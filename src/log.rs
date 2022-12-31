@@ -25,7 +25,7 @@ pub fn init_tracing_subscriber() {
                 std::env::var("LOG_LEVEL")
                     .ok()
                     .and_then(|var| LevelFilter::from_str(&var).ok())
-                    .unwrap_or_else(LevelFilter::INFO),
+                    .unwrap_or(LevelFilter::INFO),
             )
             .boxed(),
     );
@@ -45,7 +45,7 @@ pub fn init_tracing_subscriber() {
                 std::env::var("LOG_FILE_LEVEL")
                     .ok()
                     .and_then(|var| LevelFilter::from_str(&var).ok())
-                    .unwrap_or_else(LevelFilter::DEBUG),
+                    .unwrap_or(LevelFilter::DEBUG),
             )
             .boxed(),
     );
