@@ -58,12 +58,12 @@ where
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
-    http: HttpConfig,
+    pub http: HttpConfig,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HttpConfig {
-    bind: SocketAddr,
+    pub bind: SocketAddr,
 }
 
 #[cfg(test)]
