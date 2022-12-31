@@ -2,6 +2,7 @@ use std::fmt::Arguments;
 use std::fs::{create_dir_all, File, OpenOptions};
 use std::io::IoSlice;
 use std::path::Path;
+use std::str::FromStr;
 
 use chrono::{Datelike, Local};
 use tracing_subscriber::filter::LevelFilter;
@@ -20,7 +21,12 @@ pub fn init_tracing_subscriber() {
         tracing_subscriber::fmt::layer()
             .compact()
             .with_ansi(true)
-            .with_filter(LevelFilter::INFO)
+            .with_filter(
+                std::env::var("LOG_LEVEL")
+                    .ok()
+                    .and_then(|var| LevelFilter::from_str(&var).ok())
+                    .unwrap_or_else(LevelFilter::INFO),
+            )
             .boxed(),
     );
 
@@ -35,7 +41,12 @@ pub fn init_tracing_subscriber() {
             .with_thread_ids(true)
             .with_current_span(true)
             .with_writer(MakeLogFileWriter)
-            .with_filter(LevelFilter::DEBUG)
+            .with_filter(
+                std::env::var("LOG_FILE_LEVEL")
+                    .ok()
+                    .and_then(|var| LevelFilter::from_str(&var).ok())
+                    .unwrap_or_else(LevelFilter::DEBUG),
+            )
             .boxed(),
     );
 
