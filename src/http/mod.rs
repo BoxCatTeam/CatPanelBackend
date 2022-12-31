@@ -5,10 +5,12 @@ use tracing::info;
 use crate::configure::get_config;
 
 mod routes;
+mod ws;
 
 pub async fn start_http_server(handle: SubsystemHandle) -> anyhow::Result<()> {
     let app = Router::new()
-        .route("/", get(routes::hello_world));
+        .route("/", get(routes::hello_world))
+        .route("/ws", get(ws::ws_route));
 
     axum::Server::bind(&get_config().http.bind)
         .serve(app.into_make_service())
