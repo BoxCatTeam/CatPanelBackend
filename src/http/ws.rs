@@ -1,11 +1,9 @@
-use axum::extract::WebSocketUpgrade;
 use axum::extract::ws::WebSocket;
+use axum::extract::WebSocketUpgrade;
 use axum::response::IntoResponse;
 
 pub async fn ws_route(ws: WebSocketUpgrade) -> impl IntoResponse {
     ws.on_upgrade(handle)
 }
 
-async fn handle(mut ws: WebSocket) {
-
-}
+async fn handle(mut ws: WebSocket) {}
