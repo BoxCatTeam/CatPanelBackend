@@ -33,6 +33,10 @@
 
 `cargo clippy -- -D warnings`
 
+**开发过程中会有部分东西写了但是还没写使用部分，所以开发的时候可以改为**
+
+`cargo clippy -- -D warnings -A unused`
+
 - 格式化
 
 `cargo fmt`

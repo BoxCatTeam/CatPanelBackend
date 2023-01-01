@@ -26,7 +26,7 @@ sea-orm-migration = "0.10"
 rand = { version = "0.8", features = ["std", "std_rng", "getrandom", "min_const_gen", "simd_support"] }
 argon2 = { version = "0.4", features = ["std"] }
 uuid = { version = "1.2", features = ["v4", "fast-rng"] }
-axum-sessions = "0.4.0"
+axum-sessions = "0.4"
 bincode = { version = "2.0.0-rc.2", features = ["serde"] }
 chrono = "0.4"
 forwarded-header-value = "0.1"
@@ -38,6 +38,7 @@ arc-swap = "1.5"
 once_cell = "1.9"
 tokio-graceful-shutdown = "0.12"
 rocksdb = { version = "0.19", default-features = false, features = ["io-uring", "zstd"] }
+futures = "0.3"
 
 [profile.release]
 lto = true

@@ -545,6 +545,7 @@ dependencies = [
  "duct",
  "figment",
  "forwarded-header-value",
+ "futures",
  "hyper",
  "once_cell",
  "parking_lot 0.12.1",

@@ -1,4 +1,5 @@
 use std::time::Duration;
+
 use tracing::info;
 
 use crate::configure::init_configure;
@@ -14,7 +15,7 @@ static ALLOC: snmalloc_rs::SnMalloc = snmalloc_rs::SnMalloc;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    init_tracing_subscriber();
+    let wait_for_shutdown = init_tracing_subscriber();
     init_configure()?;
 
     info!("Hello, world!");
@@ -24,6 +25,8 @@ async fn main() -> anyhow::Result<()> {
         .catch_signals()
         .handle_shutdown_requests(Duration::from_secs(3))
         .await?;
+
+    wait_for_shutdown.await?;
 
     Ok(())
 }
