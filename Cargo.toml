@@ -43,6 +43,7 @@ async-graphql = { version = "5.0", features = ["tracing", "chrono", "smol_str", 
 sysinfo = "0.27"
 fnv = "1.0"
 crossbeam-utils = "0.8"
+humantime-serde = "1"
 
 [dev-dependencies]
 graphql_client = "0.11"

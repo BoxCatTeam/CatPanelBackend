@@ -65,6 +65,7 @@ pub struct Config {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HttpConfig {
     pub bind: SocketAddr,
+    #[serde(with = "humantime_serde")]
     pub system_info_refresh_limit: Duration,
 }
 
