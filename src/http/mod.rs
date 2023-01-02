@@ -12,6 +12,7 @@ mod rocksdb_session_store;
 mod routes;
 mod ws;
 mod error;
+mod model;
 
 pub async fn start_http_server(handle: SubsystemHandle) -> anyhow::Result<()> {
     let app = Router::new()

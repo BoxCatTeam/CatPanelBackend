@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use std::time::Duration;
 
 use arc_swap::{ArcSwap, Guard};
 use figment::providers::{Env, Format, Json, Serialized, Toml};
@@ -64,6 +65,7 @@ pub struct Config {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct HttpConfig {
     pub bind: SocketAddr,
+    pub system_info_refresh_limit: Duration,
 }
 
 #[cfg(test)]
