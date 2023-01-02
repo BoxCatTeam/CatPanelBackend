@@ -18,7 +18,6 @@ use tracing_subscriber::Layer;
 
 const LOG_DIR: &str = "logs";
 
-#[allow(clippy::vec_init_then_push)]
 pub fn init_tracing_subscriber() -> impl Future<Output = anyhow::Result<()>> {
     let mut layers = Vec::with_capacity(2);
 
