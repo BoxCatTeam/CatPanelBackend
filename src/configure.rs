@@ -24,7 +24,7 @@ pub fn init_configure() -> anyhow::Result<()> {
 
 #[inline]
 pub fn get_config() -> Guard<Arc<Config>> {
-    // SAFELY: 在程序一开始就应该已经调用`init_configure`
+    // SAFETY: 在程序一开始就应该已经调用`init_configure`
     unsafe { CONFIG.get_unchecked() }.load()
 }
 
@@ -51,7 +51,7 @@ where
         serde_json::to_writer(File::create("_config_auto.json")?, &config)?;
     }
 
-    // SAFELY: 在程序一开始就应该已经调用`init_configure`
+    // SAFETY: 在程序一开始就应该已经调用`init_configure`
     unsafe { CONFIG.get_unchecked() }.store(Arc::new(config));
 
     Ok(())
