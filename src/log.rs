@@ -8,6 +8,7 @@ use chrono::{Datelike, Local};
 use smallvec::SmallVec;
 use tokio::fs::{create_dir_all, File, OpenOptions};
 use tokio::io::AsyncWriteExt;
+use tokio::sync::mpsc::error::SendError;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::Notify;
 use tracing_subscriber::filter::LevelFilter;
@@ -136,19 +137,17 @@ impl std::io::Write for NonBlockingLogFileWriter {
             let sender = self.sender.clone();
             let owned_buf = SmallVec::from_slice(buf);
             handle.spawn(async move {
-                if sender
+                if let Err(SendError(Msg::Buf(err))) = sender
                     .send(Msg::Buf(owned_buf))
-                    .await
-                    .is_err() {
-                    tracing::error!(target: "log_file_writer", "日志文件写入器已经关闭但仍然试图写入");
+                    .await {
+                    tracing::error!(target: "log_file_writer", "日志文件写入器已经关闭但仍然试图写入: {:?}", std::str::from_utf8(&err));
                 }
             });
-        } else if self
+        } else if let Err(SendError(Msg::Buf(err))) = self
             .sender
             .blocking_send(Msg::Buf(SmallVec::from_slice(buf)))
-            .is_err()
         {
-            tracing::error!(target: "log_file_writer", "日志文件写入器已经关闭但仍然试图写入");
+            tracing::error!(target: "log_file_writer", "日志文件写入器已经关闭但仍然试图写入: {:?}", std::str::from_utf8(&err));
         }
 
         Ok(buf.len())
