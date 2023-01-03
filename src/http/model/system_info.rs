@@ -3,6 +3,7 @@ use std::time::{Duration, Instant};
 
 use async_graphql::{ComplexObject, Context, Enum, Object, SimpleObject};
 use crossbeam_utils::atomic::AtomicCell;
+use fnv::FnvHashMap;
 use smol_str::SmolStr;
 use sysinfo::{
     Component, ComponentExt, Cpu, CpuExt, Disk, DiskExt, NetworkData, NetworkExt, NetworksExt,
@@ -25,14 +26,14 @@ macro_rules! simple_system_info_object {
             )*
         }
     };
-    (@$impl_name:ident; @$refresh:ident; $($(#[$attr:meta])* $name:ident -> $ret:ty;)*) => {
+    (@$impl_name:ident; @$refresh:ident; @$refresh_key:expr; $($(#[$attr:meta])* $name:ident -> $ret:ty;)*) => {
         #[Object]
         impl $impl_name {
             $(
                 $(#[$attr])*
                 async fn $name(&self, ctx: &Context<'_>) -> async_graphql::Result<$ret> {
                     Ok(ctx.data::<LimitedRefreshSystem>()?
-                        .maybe_refresh_nonblocking(System::$refresh, System::$name)
+                        .maybe_refresh_nonblocking($refresh_key, System::$refresh, System::$name)
                         .await)
                 }
             )*
@@ -143,6 +144,7 @@ pub struct DiskInfo {
 simple_system_info_object! {
     @MemoryInfo;
     @refresh_memory;
+    @RefreshKey::Memory;
     /// 内存大小
     total_memory -> u64;
     /// 空闲内存
@@ -191,7 +193,7 @@ impl SystemInfo {
     async fn cpu(&self, ctx: &Context<'_>) -> async_graphql::Result<CpuInfo> {
         Ok(ctx
             .data::<LimitedRefreshSystem>()?
-            .maybe_refresh_nonblocking(System::refresh_cpu, |system| {
+            .maybe_refresh_nonblocking(RefreshKey::Cpu, System::refresh_cpu, |system| {
                 system.global_cpu_info().into()
             })
             .await)
@@ -201,7 +203,7 @@ impl SystemInfo {
     async fn cpus(&self, ctx: &Context<'_>) -> async_graphql::Result<Vec<CpuInfo>> {
         Ok(ctx
             .data::<LimitedRefreshSystem>()?
-            .maybe_refresh_nonblocking(System::refresh_cpu, |system| {
+            .maybe_refresh_nonblocking(RefreshKey::Cpu, System::refresh_cpu, |system| {
                 system.cpus().iter().map(Into::into).collect()
             })
             .await)
@@ -212,6 +214,7 @@ impl SystemInfo {
         Ok(ctx
             .data::<LimitedRefreshSystem>()?
             .maybe_refresh_nonblocking(
+                RefreshKey::Network,
                 |system| {
                     system.refresh_networks_list();
                     system.refresh_networks();
@@ -230,6 +233,7 @@ impl SystemInfo {
         Ok(ctx
             .data::<LimitedRefreshSystem>()?
             .maybe_refresh_nonblocking(
+                RefreshKey::Network,
                 |system| {
                     system.refresh_networks_list();
                     system.refresh_networks();
@@ -252,6 +256,7 @@ impl SystemInfo {
         Ok(ctx
             .data::<LimitedRefreshSystem>()?
             .maybe_refresh_nonblocking(
+                RefreshKey::Component,
                 |system| {
                     system.refresh_components_list();
                     system.refresh_components();
@@ -266,6 +271,7 @@ impl SystemInfo {
         Ok(ctx
             .data::<LimitedRefreshSystem>()?
             .maybe_refresh_nonblocking(
+                RefreshKey::Disk,
                 |system| {
                     system.refresh_disks_list();
                     system.refresh_disks();
@@ -342,17 +348,37 @@ impl<'a> From<&'a Disk> for DiskInfo {
     }
 }
 
+#[derive(Copy, Clone, Hash, PartialEq, Eq)]
+pub enum RefreshKey {
+    Cpu,
+    Memory,
+    Network,
+    Disk,
+    Component,
+}
+
 pub struct LimitedRefreshSystem {
     system: Arc<RwLock<System>>,
-    last_refresh: AtomicCell<Instant>,
+    last_refresh: FnvHashMap<RefreshKey, AtomicCell<Instant>>,
     limit: Duration,
+}
+
+fn new_last_refresh_map() -> FnvHashMap<RefreshKey, AtomicCell<Instant>> {
+    let now = || AtomicCell::new(Instant::now());
+    let mut map = FnvHashMap::default();
+    map.insert(RefreshKey::Cpu, now());
+    map.insert(RefreshKey::Memory, now());
+    map.insert(RefreshKey::Network, now());
+    map.insert(RefreshKey::Disk, now());
+    map.insert(RefreshKey::Component, now());
+    map
 }
 
 impl LimitedRefreshSystem {
     pub fn new() -> Self {
         LimitedRefreshSystem {
             system: Arc::new(RwLock::new(System::new_all())),
-            last_refresh: AtomicCell::new(Instant::now()),
+            last_refresh: new_last_refresh_map(),
             limit: get_config().http.system_info_refresh_limit,
         }
     }
@@ -362,11 +388,16 @@ impl LimitedRefreshSystem {
         self.system.read().await
     }
 
-    async fn maybe_refresh(&self, f: impl FnOnce(&mut System)) -> RwLockReadGuard<'_, System> {
-        if self.last_refresh.load().elapsed() > self.limit {
+    async fn maybe_refresh(
+        &self,
+        key: RefreshKey,
+        f: impl FnOnce(&mut System),
+    ) -> RwLockReadGuard<'_, System> {
+        if self.safe_get_last_refresh_unchecked(key).load().elapsed() > self.limit {
             let mut system = self.system.write().await;
             f(&mut system);
-            self.last_refresh.store(Instant::now());
+            self.safe_get_last_refresh_unchecked(key)
+                .store(Instant::now());
             system.downgrade()
         } else {
             self.system().await
@@ -375,13 +406,14 @@ impl LimitedRefreshSystem {
 
     async fn maybe_refresh_nonblocking<R>(
         &self,
+        key: RefreshKey,
         refresh_fn: impl FnOnce(&mut System) + Send + 'static,
         read_fn: impl FnOnce(&System) -> R + Send + 'static,
     ) -> R
     where
         R: Send + 'static,
     {
-        if self.last_refresh.load().elapsed() > self.limit {
+        if self.safe_get_last_refresh_unchecked(key).load().elapsed() > self.limit {
             let system = self.system.clone();
             let ret = tokio::task::spawn_blocking(move || {
                 let mut system = system.blocking_write();
@@ -392,11 +424,18 @@ impl LimitedRefreshSystem {
             // join error是因为task里面panic或者task被abort了
             // 而task里的panic的情况下应该与`maybe_refresh`保持一致
             .expect("maybe_refresh_nonblocking");
-            self.last_refresh.store(Instant::now());
+            self.safe_get_last_refresh_unchecked(key)
+                .store(Instant::now());
             ret
         } else {
             read_fn(&*self.system().await)
         }
+    }
+
+    // SAFETY: 全部RefreshKey都应该在hashmap里面
+    #[inline]
+    fn safe_get_last_refresh_unchecked(&self, key: RefreshKey) -> &AtomicCell<Instant> {
+        unsafe { self.last_refresh.get(&key).unwrap_unchecked() }
     }
 }
 
@@ -409,7 +448,7 @@ async fn test_nonblocking_refresh() -> anyhow::Result<()> {
 
     let now = Instant::now();
     let total_memory = system
-        .maybe_refresh(|system| {
+        .maybe_refresh(RefreshKey::Memory, |system| {
             system.refresh_cpu();
             system.refresh_memory();
             system.refresh_networks_list();
@@ -422,6 +461,7 @@ async fn test_nonblocking_refresh() -> anyhow::Result<()> {
     let now = Instant::now();
     let total_memory2 = system
         .maybe_refresh_nonblocking(
+            RefreshKey::Memory,
             |system| {
                 system.refresh_cpu();
                 system.refresh_memory();
