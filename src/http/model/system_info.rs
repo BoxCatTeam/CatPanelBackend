@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use async_graphql::{ComplexObject, Context, Enum, Object, SimpleObject};
@@ -9,7 +10,7 @@ use sysinfo::{
 };
 use tokio::sync::{RwLock, RwLockReadGuard};
 
-use crate::configure::get_config;
+use crate::configure::{get_config, init_configure};
 
 macro_rules! simple_system_info_object {
     (@$impl_name:ident; $($(#[$attr:meta])* $name:ident -> $ret:ty;)*) => {
@@ -30,10 +31,9 @@ macro_rules! simple_system_info_object {
             $(
                 $(#[$attr])*
                 async fn $name(&self, ctx: &Context<'_>) -> async_graphql::Result<$ret> {
-                    let mut system = ctx.data::<LimitedRefreshSystem>()?.maybe_refresh(|system| {
-                        system.$refresh();
-                    }).await;
-                    Ok(system.$name())
+                    Ok(ctx.data::<LimitedRefreshSystem>()?
+                        .maybe_refresh_nonblocking(System::$refresh, System::$name)
+                        .await)
                 }
             )*
         }
@@ -189,30 +189,36 @@ simple_system_info_object! {
 impl SystemInfo {
     /// 全局cpu信息(综合全部cpu)
     async fn cpu(&self, ctx: &Context<'_>) -> async_graphql::Result<CpuInfo> {
-        let system = ctx.data::<LimitedRefreshSystem>()?.maybe_refresh(|system| {
-            system.refresh_cpu();
-        }).await;
-        let cpu_info = system.global_cpu_info();
-        Ok(cpu_info.into())
+        Ok(ctx
+            .data::<LimitedRefreshSystem>()?
+            .maybe_refresh_nonblocking(System::refresh_cpu, |system| {
+                system.global_cpu_info().into()
+            })
+            .await)
     }
 
     /// 全部cpu的信息
     async fn cpus(&self, ctx: &Context<'_>) -> async_graphql::Result<Vec<CpuInfo>> {
-        let system = ctx.data::<LimitedRefreshSystem>()?.maybe_refresh(|system| {
-            system.refresh_cpu();
-        }).await;
-        let cpu_info = system.cpus();
-        Ok(cpu_info.iter().map(Into::into).collect())
+        Ok(ctx
+            .data::<LimitedRefreshSystem>()?
+            .maybe_refresh_nonblocking(System::refresh_cpu, |system| {
+                system.cpus().iter().map(Into::into).collect()
+            })
+            .await)
     }
 
     /// 全部网络接口的信息
     async fn networks(&self, ctx: &Context<'_>) -> async_graphql::Result<Vec<NetworkInfo>> {
-        let system = ctx.data::<LimitedRefreshSystem>()?.maybe_refresh(|system| {
-            system.refresh_networks_list();
-            system.refresh_networks();
-        }).await;
-        let networks = system.networks();
-        Ok(networks.iter().map(Into::into).collect())
+        Ok(ctx
+            .data::<LimitedRefreshSystem>()?
+            .maybe_refresh_nonblocking(
+                |system| {
+                    system.refresh_networks_list();
+                    system.refresh_networks();
+                },
+                |system| system.networks().iter().map(Into::into).collect(),
+            )
+            .await)
     }
 
     /// 使用网络接口名字查询单个网络接口的信息
@@ -221,40 +227,52 @@ impl SystemInfo {
         ctx: &Context<'_>,
         #[graphql(desc = "网络接口名字")] interface_name: SmolStr,
     ) -> async_graphql::Result<Option<NetworkInfo>> {
-        let system = ctx.data::<LimitedRefreshSystem>()?.maybe_refresh(|system| {
-            system.refresh_networks_list();
-            system.refresh_networks();
-        }).await;
-        let networks = system.networks();
-        Ok(networks
-            .iter()
-            .find(|(name, _)| name == &interface_name)
-            .map(Into::into))
+        Ok(ctx
+            .data::<LimitedRefreshSystem>()?
+            .maybe_refresh_nonblocking(
+                |system| {
+                    system.refresh_networks_list();
+                    system.refresh_networks();
+                },
+                move |system| {
+                    system
+                        .networks()
+                        .iter()
+                        .find(|(name, _)| name == &interface_name)
+                        .map(Into::into)
+                },
+            )
+            .await)
     }
 
     /// 全部组件信息
     /// **Linux**: 虚拟linux系统(例如docker, wsl等)不公开这些信息，所以在这些系统上组件信息可能会丢失或者错误
     /// **Windows**: 需要管理员权限
     async fn components(&self, ctx: &Context<'_>) -> async_graphql::Result<Vec<ComponentInfo>> {
-        let system = ctx.data::<LimitedRefreshSystem>()?.maybe_refresh(|system| {
-            system.refresh_components_list();
-            system.refresh_components();
-        }).await;
-        let components = system.components();
-        Ok(components.iter().map(Into::into).collect())
+        Ok(ctx
+            .data::<LimitedRefreshSystem>()?
+            .maybe_refresh_nonblocking(
+                |system| {
+                    system.refresh_components_list();
+                    system.refresh_components();
+                },
+                |system| system.components().iter().map(Into::into).collect(),
+            )
+            .await)
     }
 
     /// 全部磁盘信息
     async fn disks(&self, ctx: &Context<'_>) -> async_graphql::Result<Vec<DiskInfo>> {
-        let system = ctx
+        Ok(ctx
             .data::<LimitedRefreshSystem>()?
-            .maybe_refresh(|system| {
-                system.refresh_disks_list();
-                system.refresh_disks();
-            })
-            .await;
-        let disks = system.disks();
-        Ok(disks.iter().map(Into::into).collect())
+            .maybe_refresh_nonblocking(
+                |system| {
+                    system.refresh_disks_list();
+                    system.refresh_disks();
+                },
+                |system| system.disks().iter().map(Into::into).collect(),
+            )
+            .await)
     }
 }
 
@@ -325,7 +343,7 @@ impl<'a> From<&'a Disk> for DiskInfo {
 }
 
 pub struct LimitedRefreshSystem {
-    system: RwLock<System>,
+    system: Arc<RwLock<System>>,
     last_refresh: AtomicCell<Instant>,
     limit: Duration,
 }
@@ -333,7 +351,7 @@ pub struct LimitedRefreshSystem {
 impl LimitedRefreshSystem {
     pub fn new() -> Self {
         LimitedRefreshSystem {
-            system: RwLock::new(System::new_all()),
+            system: Arc::new(RwLock::new(System::new_all())),
             last_refresh: AtomicCell::new(Instant::now()),
             limit: get_config().http.system_info_refresh_limit,
         }
@@ -354,4 +372,67 @@ impl LimitedRefreshSystem {
             self.system().await
         }
     }
+
+    async fn maybe_refresh_nonblocking<R>(
+        &self,
+        refresh_fn: impl FnOnce(&mut System) + Send + 'static,
+        read_fn: impl FnOnce(&System) -> R + Send + 'static,
+    ) -> R
+    where
+        R: Send + 'static,
+    {
+        if self.last_refresh.load().elapsed() > self.limit {
+            let system = self.system.clone();
+            let ret = tokio::task::spawn_blocking(move || {
+                let mut system = system.blocking_write();
+                refresh_fn(&mut system);
+                read_fn(&system.downgrade())
+            })
+            .await
+            // join error是因为task里面panic或者task被abort了
+            // 而task里的panic的情况下应该与`maybe_refresh`保持一致
+            .expect("maybe_refresh_nonblocking");
+            self.last_refresh.store(Instant::now());
+            ret
+        } else {
+            read_fn(&*self.system().await)
+        }
+    }
+}
+
+// 基于以下简单(不是很合理)的测试, 使用`maybe_refresh_nonblocking`几乎总是比`maybe_refresh`快3倍以上
+// 证明`System::refresh_xxx`比较耗时的操作，所以改成使用`maybe_refresh_nonblocking`
+#[tokio::test]
+async fn test_nonblocking_refresh() -> anyhow::Result<()> {
+    init_configure()?;
+    let system = LimitedRefreshSystem::new();
+
+    let now = Instant::now();
+    let total_memory = system
+        .maybe_refresh(|system| {
+            system.refresh_cpu();
+            system.refresh_memory();
+            system.refresh_networks_list();
+            system.refresh_networks();
+        })
+        .await
+        .total_memory();
+    dbg!(now.elapsed());
+
+    let now = Instant::now();
+    let total_memory2 = system
+        .maybe_refresh_nonblocking(
+            |system| {
+                system.refresh_cpu();
+                system.refresh_memory();
+                system.refresh_networks_list();
+                system.refresh_networks();
+            },
+            System::total_memory,
+        )
+        .await;
+    dbg!(now.elapsed());
+
+    assert_eq!(total_memory, total_memory2);
+    Ok(())
 }
