@@ -13,8 +13,7 @@ mod log;
 #[global_allocator]
 static ALLOC: snmalloc_rs::SnMalloc = snmalloc_rs::SnMalloc;
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main2() -> anyhow::Result<()> {
     let wait_for_shutdown = init_tracing_subscriber();
     init_configure()?;
 
@@ -29,4 +28,11 @@ async fn main() -> anyhow::Result<()> {
     wait_for_shutdown.await?;
 
     Ok(())
+}
+
+fn main() -> anyhow::Result<()> {
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()?
+        .block_on(main2())
 }
