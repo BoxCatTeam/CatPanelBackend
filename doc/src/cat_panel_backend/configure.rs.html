@@ -97,8 +97,6 @@
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
-<a href="#101" id="101">101</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::fs::File;
 <span class="kw">use </span>std::net::SocketAddr;
 <span class="kw">use </span>std::sync::Arc;
@@ -118,9 +116,7 @@
     }
     <span class="kw">let </span>config = reload()<span class="question-mark">?</span>;
     <span class="attr">#[cfg(test)]
-    </span>CONFIG
-        .set(ArcSwap::from_pointee(config))
-        .ok();
+    </span>CONFIG.set(ArcSwap::from_pointee(config)).ok();
     <span class="attr">#[cfg(not(test))]
     </span>CONFIG
         .set(ArcSwap::from_pointee(config))
