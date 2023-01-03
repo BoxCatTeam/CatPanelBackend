@@ -25,6 +25,9 @@ async fn main2() -> anyhow::Result<()> {
         .handle_shutdown_requests(Duration::from_secs(3))
         .await?;
 
+    // 在tokio_graceful_shutdown关闭后等待
+    // 因为异步写入的情况下有时候会出现日志文件写入器已经关闭而前面的日志才发送的情况
+    tokio::time::sleep(Duration::from_millis(200)).await;
     wait_for_shutdown.await?;
 
     Ok(())
