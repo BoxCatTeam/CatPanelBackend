@@ -16,7 +16,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: doc
-          args: --timings
+          args: --timings --release
       - uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: target/doc
