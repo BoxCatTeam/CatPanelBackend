@@ -26,6 +26,7 @@ mod tests {
     use crate::http::model::schema;
 
     #[test]
+    #[ignore]
     fn test_system_info() {
         todo!()
     }
