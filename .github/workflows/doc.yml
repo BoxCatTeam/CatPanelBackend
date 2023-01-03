@@ -1,0 +1,26 @@
+on: [push, pull_request, workflow_dispatch]
+
+name: 文档部署
+
+jobs:
+  build-and-deploy:
+    name: 生成并部署
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: doc --timings
+      - uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: target/doc
+          target-folder: doc
+      - uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: target/cargo-timings
+          target-folder: timings
