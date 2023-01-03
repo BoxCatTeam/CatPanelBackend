@@ -16,6 +16,11 @@ pub fn init_configure() -> anyhow::Result<()> {
         tracing::info!("load {}", path.display());
     }
     let config = reload()?;
+    #[cfg(test)]
+    CONFIG
+        .set(ArcSwap::from_pointee(config))
+        .ok();
+    #[cfg(not(test))]
     CONFIG
         .set(ArcSwap::from_pointee(config))
         .expect("CONFIG意外的重复初始化");

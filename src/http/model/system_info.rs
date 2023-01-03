@@ -11,7 +11,7 @@ use sysinfo::{
 };
 use tokio::sync::{RwLock, RwLockReadGuard};
 
-use crate::configure::{get_config, init_configure};
+use crate::configure::get_config;
 
 macro_rules! simple_system_info_object {
     (@$impl_name:ident; $($(#[$attr:meta])* $name:ident -> $ret:ty;)*) => {
@@ -498,7 +498,7 @@ impl LimitedRefreshSystem {
 // 证明`System::refresh_xxx`比较耗时的操作，所以改成使用`maybe_refresh_nonblocking`
 #[tokio::test]
 async fn test_nonblocking_refresh() -> anyhow::Result<()> {
-    init_configure()?;
+    crate::configure::init_configure()?;
     let system = LimitedRefreshSystem::new();
 
     let now = Instant::now();
