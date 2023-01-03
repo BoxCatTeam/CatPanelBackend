@@ -1,5 +1,13 @@
 # CatPanelBackend
 
+## 文档
+### 编译时间分析
+[cargo timing](https://boxcatteam.github.io/CatPanelBackend/timings/cargo-timing.html)
+### 代码文档
+todo
+### Graphql
+todo
+
 ## 国内镜像
 [字节跳动](https://rsproxy.cn)
 
