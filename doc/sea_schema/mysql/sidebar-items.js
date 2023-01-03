@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["def","To represent MySQL’s schema definitions"],["discovery","To query & parse MySQL’s INFORMATION_SCHEMA and construct a [`Schema`]"],["parser","To parse MySQL’s INFORMATION_SCHEMA"],["probe",""],["query","To query MySQL’s INFORMATION_SCHEMA"],["writer","To write [`mysql::Schema`] to SQL statements"]],"struct":[["MySql",""]]};

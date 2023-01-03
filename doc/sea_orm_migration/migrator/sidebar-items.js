@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["MigrationStatus","Status of migration"]],"struct":[["Migration",""]],"trait":[["MigratorTrait","Performing migrations on a database"]]};

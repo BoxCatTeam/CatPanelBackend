@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["SchemaDiscovery","Performs all the methods for schema discovery of a SQLite database"]],"type":[["DiscoveryResult","This type simplifies error handling"]]};

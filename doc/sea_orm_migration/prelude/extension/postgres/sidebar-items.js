@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["PgFunction","Functions"],["TypeAlterAddOpt",""],["TypeAlterOpt",""],["TypeAs",""],["TypeDropOpt",""],["TypeRef",""]],"struct":[["PgFunc","Function call helper."],["Type","Helper for constructing any type statement"],["TypeAlterStatement",""],["TypeCreateStatement",""],["TypeDropStatement",""]],"trait":[["IntoTypeRef",""],["TypeBuilder",""]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["DiskType",""],["RefreshKey",""]],"fn":[["new_last_refresh_map",""]],"macro":[["simple_system_info_object",""]],"opaque":[["",""]],"struct":[["ComponentInfo",""],["CpuInfo",""],["DiskInfo",""],["LimitedRefreshSystem",""],["MemoryInfo",""],["NetworkInfo",""],["SystemInfo",""],["SystemInfoInner",""]]};

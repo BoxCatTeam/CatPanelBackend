@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"macro":[["debug_print",""]],"mod":[["mysql",""],["name",""],["postgres",""],["probe",""],["sqlite","This module handles discovery of a schema from an SQLite database. Note that only the types specified by official SQLite documentation are discovered."]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Resource","A resource which defines a set of conventional CRUD routes."]],"trait":[["RouterExt","Extension trait that adds additional methods to [`Router`]."]]};

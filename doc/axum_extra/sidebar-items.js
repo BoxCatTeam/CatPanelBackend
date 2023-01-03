@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["body","Additional bodies."],["either","`Either*` types for combining extractors or responses into a single type."],["extract","Additional extractors."],["handler","Additional handler utilities."],["response","Additional types for generating responses."],["routing","Additional types for defining routes."]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["TableType",""],["TablesFields","Ref: https://www.postgresql.org/docs/13/infoschema-tables.html"]],"struct":[["TableQueryResult",""]]};

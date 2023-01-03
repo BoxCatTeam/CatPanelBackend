@@ -1,0 +1,223 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Constraints for any type that needs to perform select statements on a Model"><meta name="keywords" content="rust, rustlang, rust-lang, QuerySelect"><title>QuerySelect in sea_orm::query - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-303867cd4f9d7e56.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-4a084badb5778746.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../sea_orm/index.html"><div class="logo-container"><img src="https://raw.githubusercontent.com/SeaQL/sea-query/master/docs/SeaQL icon dark.png" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../sea_orm/index.html"><div class="logo-container">
+                    <img src="https://raw.githubusercontent.com/SeaQL/sea-query/master/docs/SeaQL icon dark.png" alt="logo"></div></a><h2 class="location"><a href="#">QuerySelect</a></h2><div class="sidebar-elems"><section><h3><a href="#required-associated-types">Required Associated Types</a></h3><ul class="block"><li><a href="#associatedtype.QueryStatement">QueryStatement</a></li></ul><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.query">query</a></li></ul><h3><a href="#provided-methods">Provided Methods</a></h3><ul class="block"><li><a href="#method.column">column</a></li><li><a href="#method.column_as">column_as</a></li><li><a href="#method.columns">columns</a></li><li><a href="#method.distinct">distinct</a></li><li><a href="#method.distinct_on">distinct_on</a></li><li><a href="#method.group_by">group_by</a></li><li><a href="#method.having">having</a></li><li><a href="#method.join">join</a></li><li><a href="#method.join_as">join_as</a></li><li><a href="#method.join_as_rev">join_as_rev</a></li><li><a href="#method.join_rev">join_rev</a></li><li><a href="#method.limit">limit</a></li><li><a href="#method.lock">lock</a></li><li><a href="#method.lock_exclusive">lock_exclusive</a></li><li><a href="#method.lock_shared">lock_shared</a></li><li><a href="#method.offset">offset</a></li><li><a href="#method.select_only">select_only</a></li></ul><h3><a href="#implementors">Implementors</a></h3></section><h2><a href="index.html">In sea_orm::query</a></h2></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Trait <a href="../index.html">sea_orm</a>::<wbr><a href="index.html">query</a>::<wbr><a class="trait" href="#">QuerySelect</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../../src/sea_orm/query/helper.rs.html#17-374">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><div class="item-decl"><pre class="rust trait"><code>pub trait QuerySelect: <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> {
+    type <a href="#associatedtype.QueryStatement" class="associatedtype">QueryStatement</a>;
+
+<details class="rustdoc-toggle type-contents-toggle"><summary class="hideme"><span>Show 18 methods</span></summary>    fn <a href="#tymethod.query" class="fn">query</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="../../sea_query/query/select/struct.SelectStatement.html" title="struct sea_query::query::select::SelectStatement">SelectStatement</a>;
+
+    fn <a href="#method.select_only" class="fn">select_only</a>(self) -&gt; Self { ... }
+<span class="item-spacer"></span>    fn <a href="#method.column" class="fn">column</a>&lt;C&gt;(self, col: C) -&gt; Self<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="where">where<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../entity/prelude/trait.ColumnTrait.html" title="trait sea_orm::entity::prelude::ColumnTrait">ColumnTrait</a></span>,
+    { ... }
+<span class="item-spacer"></span>    fn <a href="#method.column_as" class="fn">column_as</a>&lt;C, I&gt;(self, col: C, alias: I) -&gt; Self<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="where">where<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="trait.IntoSimpleExpr.html" title="trait sea_orm::query::IntoSimpleExpr">IntoSimpleExpr</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../entity/trait.IntoIdentity.html" title="trait sea_orm::entity::IntoIdentity">IntoIdentity</a></span>,
+    { ... }
+<span class="item-spacer"></span>    fn <a href="#method.columns" class="fn">columns</a>&lt;C, I&gt;(self, cols: I) -&gt; Self<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="where">where<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../entity/prelude/trait.ColumnTrait.html" title="trait sea_orm::entity::prelude::ColumnTrait">ColumnTrait</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="https://doc.rust-lang.org/nightly/core/iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator">IntoIterator</a>&lt;Item = C&gt;</span>,
+    { ... }
+<span class="item-spacer"></span>    fn <a href="#method.offset" class="fn">offset</a>(self, offset: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>) -&gt; Self { ... }
+<span class="item-spacer"></span>    fn <a href="#method.limit" class="fn">limit</a>(self, limit: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>) -&gt; Self { ... }
+<span class="item-spacer"></span>    fn <a href="#method.group_by" class="fn">group_by</a>&lt;C&gt;(self, col: C) -&gt; Self<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="where">where<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="trait.IntoSimpleExpr.html" title="trait sea_orm::query::IntoSimpleExpr">IntoSimpleExpr</a></span>,
+    { ... }
+<span class="item-spacer"></span>    fn <a href="#method.having" class="fn">having</a>&lt;F&gt;(self, filter: F) -&gt; Self<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="where">where<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;F: <a class="trait" href="../../sea_query/query/condition/trait.IntoCondition.html" title="trait sea_query::query::condition::IntoCondition">IntoCondition</a></span>,
+    { ... }
+<span class="item-spacer"></span>    fn <a href="#method.distinct" class="fn">distinct</a>(self) -&gt; Self { ... }
+<span class="item-spacer"></span>    fn <a href="#method.distinct_on" class="fn">distinct_on</a>&lt;T, I&gt;(self, cols: I) -&gt; Self<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="where">where<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;T: <a class="trait" href="../../sea_query/types/trait.IntoColumnRef.html" title="trait sea_query::types::IntoColumnRef">IntoColumnRef</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="https://doc.rust-lang.org/nightly/core/iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator">IntoIterator</a>&lt;Item = T&gt;</span>,
+    { ... }
+<span class="item-spacer"></span>    fn <a href="#method.join" class="fn">join</a>(self, join: <a class="enum" href="enum.JoinType.html" title="enum sea_orm::query::JoinType">JoinType</a>, rel: <a class="struct" href="../entity/prelude/struct.RelationDef.html" title="struct sea_orm::entity::prelude::RelationDef">RelationDef</a>) -&gt; Self { ... }
+<span class="item-spacer"></span>    fn <a href="#method.join_rev" class="fn">join_rev</a>(self, join: <a class="enum" href="enum.JoinType.html" title="enum sea_orm::query::JoinType">JoinType</a>, rel: <a class="struct" href="../entity/prelude/struct.RelationDef.html" title="struct sea_orm::entity::prelude::RelationDef">RelationDef</a>) -&gt; Self { ... }
+<span class="item-spacer"></span>    fn <a href="#method.join_as" class="fn">join_as</a>&lt;I&gt;(self, join: <a class="enum" href="enum.JoinType.html" title="enum sea_orm::query::JoinType">JoinType</a>, rel: <a class="struct" href="../entity/prelude/struct.RelationDef.html" title="struct sea_orm::entity::prelude::RelationDef">RelationDef</a>, alias: I) -&gt; Self<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="where">where<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../../sea_query/types/trait.IntoIden.html" title="trait sea_query::types::IntoIden">IntoIden</a></span>,
+    { ... }
+<span class="item-spacer"></span>    fn <a href="#method.join_as_rev" class="fn">join_as_rev</a>&lt;I&gt;(self, join: <a class="enum" href="enum.JoinType.html" title="enum sea_orm::query::JoinType">JoinType</a>, rel: <a class="struct" href="../entity/prelude/struct.RelationDef.html" title="struct sea_orm::entity::prelude::RelationDef">RelationDef</a>, alias: I) -&gt; Self<br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="where">where<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../../sea_query/types/trait.IntoIden.html" title="trait sea_query::types::IntoIden">IntoIden</a></span>,
+    { ... }
+<span class="item-spacer"></span>    fn <a href="#method.lock" class="fn">lock</a>(self, lock_type: <a class="enum" href="../../sea_query/query/select/enum.LockType.html" title="enum sea_query::query::select::LockType">LockType</a>) -&gt; Self { ... }
+<span class="item-spacer"></span>    fn <a href="#method.lock_shared" class="fn">lock_shared</a>(self) -&gt; Self { ... }
+<span class="item-spacer"></span>    fn <a href="#method.lock_exclusive" class="fn">lock_exclusive</a>(self) -&gt; Self { ... }
+</details>}</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Constraints for any type that needs to perform select statements on a Model</p>
+</div></details><h2 id="required-associated-types" class="small-section-header">Required Associated Types<a href="#required-associated-types" class="anchor">§</a></h2><div class="methods"><section id="associatedtype.QueryStatement" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#19">source</a><h4 class="code-header">type <a href="#associatedtype.QueryStatement" class="associatedtype">QueryStatement</a></h4></section></div><h2 id="required-methods" class="small-section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="rustdoc-toggle method-toggle" open><summary><section id="tymethod.query" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#22">source</a><h4 class="code-header">fn <a href="#tymethod.query" class="fn">query</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="../../sea_query/query/select/struct.SelectStatement.html" title="struct sea_query::query::select::SelectStatement">SelectStatement</a></h4></section></summary><div class="docblock"><p>Add the select SQL statement</p>
+</div></details></div><h2 id="provided-methods" class="small-section-header">Provided Methods<a href="#provided-methods" class="anchor">§</a></h2><div class="methods"><details class="rustdoc-toggle method-toggle" open><summary><section id="method.select_only" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#25-28">source</a><h4 class="code-header">fn <a href="#method.select_only" class="fn">select_only</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Clear the selection list</p>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.column" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#66-72">source</a><h4 class="code-header">fn <a href="#method.column" class="fn">column</a>&lt;C&gt;(self, col: C) -&gt; Self<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../entity/prelude/trait.ColumnTrait.html" title="trait sea_orm::entity::prelude::ColumnTrait">ColumnTrait</a>,</span></h4></section></summary><div class="docblock"><p>Add a select column</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::cake, DbBackend};
+
+<span class="macro">assert_eq!</span>(
+    cake::Entity::find()
+        .select_only()
+        .column(cake::Column::Name)
+        .build(DbBackend::Postgres)
+        .to_string(),
+    <span class="string">r#&quot;SELECT &quot;cake&quot;.&quot;name&quot; FROM &quot;cake&quot;&quot;#
+</span>);</code></pre></div>
+<p>Enum column will be casted into text (PostgreSQL only)</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::lunch_set, DbBackend};
+
+<span class="macro">assert_eq!</span>(
+    lunch_set::Entity::find()
+        .select_only()
+        .column(lunch_set::Column::Tea)
+        .build(DbBackend::Postgres)
+        .to_string(),
+    <span class="string">r#&quot;SELECT CAST(&quot;lunch_set&quot;.&quot;tea&quot; AS text) FROM &quot;lunch_set&quot;&quot;#
+</span>);
+<span class="macro">assert_eq!</span>(
+    lunch_set::Entity::find()
+        .select_only()
+        .column(lunch_set::Column::Tea)
+        .build(DbBackend::MySql)
+        .to_string(),
+    <span class="string">r#&quot;SELECT `lunch_set`.`tea` FROM `lunch_set`&quot;#
+</span>);</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.column_as" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#87-98">source</a><h4 class="code-header">fn <a href="#method.column_as" class="fn">column_as</a>&lt;C, I&gt;(self, col: C, alias: I) -&gt; Self<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="trait.IntoSimpleExpr.html" title="trait sea_orm::query::IntoSimpleExpr">IntoSimpleExpr</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../entity/trait.IntoIdentity.html" title="trait sea_orm::entity::IntoIdentity">IntoIdentity</a>,</span></h4></section></summary><div class="docblock"><p>Add a select column with alias</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::cake, DbBackend};
+
+<span class="macro">assert_eq!</span>(
+    cake::Entity::find()
+        .select_only()
+        .column_as(cake::Column::Id.count(), <span class="string">&quot;count&quot;</span>)
+        .build(DbBackend::Postgres)
+        .to_string(),
+    <span class="string">r#&quot;SELECT COUNT(&quot;cake&quot;.&quot;id&quot;) AS &quot;count&quot; FROM &quot;cake&quot;&quot;#
+</span>);</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.columns" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#155-164">source</a><h4 class="code-header">fn <a href="#method.columns" class="fn">columns</a>&lt;C, I&gt;(self, cols: I) -&gt; Self<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="../entity/prelude/trait.ColumnTrait.html" title="trait sea_orm::entity::prelude::ColumnTrait">ColumnTrait</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="https://doc.rust-lang.org/nightly/core/iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator">IntoIterator</a>&lt;Item = C&gt;,</span></h4></section></summary><div class="docblock"><p>Select columns</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::cake, DbBackend};
+
+<span class="macro">assert_eq!</span>(
+    cake::Entity::find()
+        .select_only()
+        .columns([cake::Column::Id, cake::Column::Name])
+        .build(DbBackend::Postgres)
+        .to_string(),
+    <span class="string">r#&quot;SELECT &quot;cake&quot;.&quot;id&quot;, &quot;cake&quot;.&quot;name&quot; FROM &quot;cake&quot;&quot;#
+</span>);</code></pre></div>
+<p>Conditionally select all columns expect a specific column</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::cake, DbBackend};
+
+<span class="macro">assert_eq!</span>(
+    cake::Entity::find()
+        .select_only()
+        .columns(cake::Column::iter().filter(|col| <span class="kw">match </span>col {
+            cake::Column::Id =&gt; <span class="bool-val">false</span>,
+            <span class="kw">_ </span>=&gt; <span class="bool-val">true</span>,
+        }))
+        .build(DbBackend::Postgres)
+        .to_string(),
+    <span class="string">r#&quot;SELECT &quot;cake&quot;.&quot;name&quot; FROM &quot;cake&quot;&quot;#
+</span>);</code></pre></div>
+<p>Enum column will be casted into text (PostgreSQL only)</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::lunch_set, DbBackend};
+
+<span class="macro">assert_eq!</span>(
+    lunch_set::Entity::find()
+        .select_only()
+        .columns([lunch_set::Column::Name, lunch_set::Column::Tea])
+        .build(DbBackend::Postgres)
+        .to_string(),
+    <span class="string">r#&quot;SELECT &quot;lunch_set&quot;.&quot;name&quot;, CAST(&quot;lunch_set&quot;.&quot;tea&quot; AS text) FROM &quot;lunch_set&quot;&quot;#
+</span>);
+<span class="macro">assert_eq!</span>(
+    lunch_set::Entity::find()
+        .select_only()
+        .columns([lunch_set::Column::Name, lunch_set::Column::Tea])
+        .build(DbBackend::MySql)
+        .to_string(),
+    <span class="string">r#&quot;SELECT `lunch_set`.`name`, `lunch_set`.`tea` FROM `lunch_set`&quot;#
+</span>);</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.offset" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#178-181">source</a><h4 class="code-header">fn <a href="#method.offset" class="fn">offset</a>(self, offset: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Add an offset expression</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::cake, DbBackend};
+
+<span class="macro">assert_eq!</span>(
+    cake::Entity::find()
+        .offset(<span class="number">10</span>)
+        .build(DbBackend::MySql)
+        .to_string(),
+    <span class="string">&quot;SELECT `cake`.`id`, `cake`.`name` FROM `cake` OFFSET 10&quot;
+</span>);</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.limit" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#195-198">source</a><h4 class="code-header">fn <a href="#method.limit" class="fn">limit</a>(self, limit: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Add a limit expression</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::cake, DbBackend};
+
+<span class="macro">assert_eq!</span>(
+    cake::Entity::find()
+        .limit(<span class="number">10</span>)
+        .build(DbBackend::MySql)
+        .to_string(),
+    <span class="string">&quot;SELECT `cake`.`id`, `cake`.`name` FROM `cake` LIMIT 10&quot;
+</span>);</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.group_by" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#214-220">source</a><h4 class="code-header">fn <a href="#method.group_by" class="fn">group_by</a>&lt;C&gt;(self, col: C) -&gt; Self<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="trait.IntoSimpleExpr.html" title="trait sea_orm::query::IntoSimpleExpr">IntoSimpleExpr</a>,</span></h4></section></summary><div class="docblock"><p>Add a group by column</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::cake, DbBackend};
+
+<span class="macro">assert_eq!</span>(
+    cake::Entity::find()
+        .select_only()
+        .column(cake::Column::Name)
+        .group_by(cake::Column::Name)
+        .build(DbBackend::Postgres)
+        .to_string(),
+    <span class="string">r#&quot;SELECT &quot;cake&quot;.&quot;name&quot; FROM &quot;cake&quot; GROUP BY &quot;cake&quot;.&quot;name&quot;&quot;#
+</span>);</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.having" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#235-241">source</a><h4 class="code-header">fn <a href="#method.having" class="fn">having</a>&lt;F&gt;(self, filter: F) -&gt; Self<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;F: <a class="trait" href="../../sea_query/query/condition/trait.IntoCondition.html" title="trait sea_query::query::condition::IntoCondition">IntoCondition</a>,</span></h4></section></summary><div class="docblock"><p>Add an AND HAVING expression</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::cake, DbBackend};
+
+<span class="macro">assert_eq!</span>(
+    cake::Entity::find()
+        .having(cake::Column::Id.eq(<span class="number">4</span>))
+        .having(cake::Column::Id.eq(<span class="number">5</span>))
+        .build(DbBackend::MySql)
+        .to_string(),
+    <span class="string">&quot;SELECT `cake`.`id`, `cake`.`name` FROM `cake` HAVING `cake`.`id` = 4 AND `cake`.`id` = 5&quot;
+</span>);</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.distinct" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#263-266">source</a><h4 class="code-header">fn <a href="#method.distinct" class="fn">distinct</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Add a DISTINCT expression</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::cake, DbBackend};
+<span class="kw">struct </span>Input {
+    name: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+<span class="kw">let </span>input = Input {
+    name: <span class="prelude-val">Some</span>(<span class="string">&quot;cheese&quot;</span>.to_owned()),
+};
+<span class="macro">assert_eq!</span>(
+    cake::Entity::find()
+        .filter(
+            Condition::all().add_option(input.name.map(|n| cake::Column::Name.contains(<span class="kw-2">&amp;</span>n)))
+        )
+        .distinct()
+        .build(DbBackend::MySql)
+        .to_string(),
+    <span class="string">&quot;SELECT DISTINCT `cake`.`id`, `cake`.`name` FROM `cake` WHERE `cake`.`name` LIKE &#39;%cheese%&#39;&quot;
+</span>);</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.distinct_on" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#289-296">source</a><h4 class="code-header">fn <a href="#method.distinct_on" class="fn">distinct_on</a>&lt;T, I&gt;(self, cols: I) -&gt; Self<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;T: <a class="trait" href="../../sea_query/types/trait.IntoColumnRef.html" title="trait sea_query::types::IntoColumnRef">IntoColumnRef</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="https://doc.rust-lang.org/nightly/core/iter/traits/collect/trait.IntoIterator.html" title="trait core::iter::traits::collect::IntoIterator">IntoIterator</a>&lt;Item = T&gt;,</span></h4></section></summary><div class="docblock"><p>Add a DISTINCT ON expression
+NOTE: this function is only supported by <code>sqlx-postgres</code></p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>sea_orm::{entity::<span class="kw-2">*</span>, query::<span class="kw-2">*</span>, tests_cfg::cake, DbBackend};
+<span class="kw">struct </span>Input {
+    name: <span class="prelude-ty">Option</span>&lt;String&gt;,
+}
+<span class="kw">let </span>input = Input {
+    name: <span class="prelude-val">Some</span>(<span class="string">&quot;cheese&quot;</span>.to_owned()),
+};
+<span class="macro">assert_eq!</span>(
+    cake::Entity::find()
+        .filter(
+            Condition::all().add_option(input.name.map(|n| cake::Column::Name.contains(<span class="kw-2">&amp;</span>n)))
+        )
+        .distinct_on([cake::Column::Name])
+        .build(DbBackend::Postgres)
+        .to_string(),
+    <span class="string">&quot;SELECT DISTINCT ON (\&quot;name\&quot;) \&quot;cake\&quot;.\&quot;id\&quot;, \&quot;cake\&quot;.\&quot;name\&quot; FROM \&quot;cake\&quot; WHERE \&quot;cake\&quot;.\&quot;name\&quot; LIKE &#39;%cheese%&#39;&quot;
+</span>);</code></pre></div>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.join" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#316-320">source</a><h4 class="code-header">fn <a href="#method.join" class="fn">join</a>(self, join: <a class="enum" href="enum.JoinType.html" title="enum sea_orm::query::JoinType">JoinType</a>, rel: <a class="struct" href="../entity/prelude/struct.RelationDef.html" title="struct sea_orm::entity::prelude::RelationDef">RelationDef</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Join via <a href="../entity/prelude/struct.RelationDef.html" title="RelationDef"><code>RelationDef</code></a>.</p>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.join_rev" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#325-329">source</a><h4 class="code-header">fn <a href="#method.join_rev" class="fn">join_rev</a>(self, join: <a class="enum" href="enum.JoinType.html" title="enum sea_orm::query::JoinType">JoinType</a>, rel: <a class="struct" href="../entity/prelude/struct.RelationDef.html" title="struct sea_orm::entity::prelude::RelationDef">RelationDef</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Join via <a href="../entity/prelude/struct.RelationDef.html" title="RelationDef"><code>RelationDef</code></a> but in reverse direction.
+Assume when there exist a relation A to B.
+You can reverse join B from A.</p>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.join_as" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#332-341">source</a><h4 class="code-header">fn <a href="#method.join_as" class="fn">join_as</a>&lt;I&gt;(self, join: <a class="enum" href="enum.JoinType.html" title="enum sea_orm::query::JoinType">JoinType</a>, rel: <a class="struct" href="../entity/prelude/struct.RelationDef.html" title="struct sea_orm::entity::prelude::RelationDef">RelationDef</a>, alias: I) -&gt; Self<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../../sea_query/types/trait.IntoIden.html" title="trait sea_query::types::IntoIden">IntoIden</a>,</span></h4></section></summary><div class="docblock"><p>Join via <a href="../entity/prelude/struct.RelationDef.html" title="RelationDef"><code>RelationDef</code></a> with table alias.</p>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.join_as_rev" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#346-355">source</a><h4 class="code-header">fn <a href="#method.join_as_rev" class="fn">join_as_rev</a>&lt;I&gt;(self, join: <a class="enum" href="enum.JoinType.html" title="enum sea_orm::query::JoinType">JoinType</a>, rel: <a class="struct" href="../entity/prelude/struct.RelationDef.html" title="struct sea_orm::entity::prelude::RelationDef">RelationDef</a>, alias: I) -&gt; Self<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;I: <a class="trait" href="../../sea_query/types/trait.IntoIden.html" title="trait sea_query::types::IntoIden">IntoIden</a>,</span></h4></section></summary><div class="docblock"><p>Join via <a href="../entity/prelude/struct.RelationDef.html" title="RelationDef"><code>RelationDef</code></a> with table alias but in reverse direction.
+Assume when there exist a relation A to B.
+You can reverse join B from A.</p>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.lock" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#358-361">source</a><h4 class="code-header">fn <a href="#method.lock" class="fn">lock</a>(self, lock_type: <a class="enum" href="../../sea_query/query/select/enum.LockType.html" title="enum sea_query::query::select::LockType">LockType</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Select lock</p>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.lock_shared" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#364-367">source</a><h4 class="code-header">fn <a href="#method.lock_shared" class="fn">lock_shared</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Select lock shared</p>
+</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.lock_exclusive" class="method has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/helper.rs.html#370-373">source</a><h4 class="code-header">fn <a href="#method.lock_exclusive" class="fn">lock_exclusive</a>(self) -&gt; Self</h4></section></summary><div class="docblock"><p>Select lock exclusive</p>
+</div></details></div><h2 id="implementors" class="small-section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"><details class="rustdoc-toggle implementors-toggle"><summary><section id="impl-QuerySelect-for-Select%3CE%3E" class="impl has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/select.rs.html#87">source</a><a href="#impl-QuerySelect-for-Select%3CE%3E" class="anchor">§</a><h3 class="code-header">impl&lt;E&gt; <a class="trait" href="trait.QuerySelect.html" title="trait sea_orm::query::QuerySelect">QuerySelect</a> for <a class="struct" href="../entity/prelude/struct.Select.html" title="struct sea_orm::entity::prelude::Select">Select</a>&lt;E&gt;<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;E: <a class="trait" href="../entity/prelude/trait.EntityTrait.html" title="trait sea_orm::entity::prelude::EntityTrait">EntityTrait</a>,</span></h3></section></summary><div class="impl-items"><section id="associatedtype.QueryStatement-1" class="associatedtype trait-impl has-srclink"><a href="#associatedtype.QueryStatement-1" class="anchor">§</a><h4 class="code-header">type <a href="#associatedtype.QueryStatement" class="associatedtype">QueryStatement</a> = <a class="struct" href="../../sea_query/query/select/struct.SelectStatement.html" title="struct sea_query::query::select::SelectStatement">SelectStatement</a></h4></section></div></details><details class="rustdoc-toggle implementors-toggle"><summary><section id="impl-QuerySelect-for-SelectTwo%3CE%2C%20F%3E" class="impl has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/select.rs.html#87">source</a><a href="#impl-QuerySelect-for-SelectTwo%3CE%2C%20F%3E" class="anchor">§</a><h3 class="code-header">impl&lt;E, F&gt; <a class="trait" href="trait.QuerySelect.html" title="trait sea_orm::query::QuerySelect">QuerySelect</a> for <a class="struct" href="struct.SelectTwo.html" title="struct sea_orm::query::SelectTwo">SelectTwo</a>&lt;E, F&gt;<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;E: <a class="trait" href="../entity/prelude/trait.EntityTrait.html" title="trait sea_orm::entity::prelude::EntityTrait">EntityTrait</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;F: <a class="trait" href="../entity/prelude/trait.EntityTrait.html" title="trait sea_orm::entity::prelude::EntityTrait">EntityTrait</a>,</span></h3></section></summary><div class="impl-items"><section id="associatedtype.QueryStatement-2" class="associatedtype trait-impl has-srclink"><a href="#associatedtype.QueryStatement-2" class="anchor">§</a><h4 class="code-header">type <a href="#associatedtype.QueryStatement" class="associatedtype">QueryStatement</a> = <a class="struct" href="../../sea_query/query/select/struct.SelectStatement.html" title="struct sea_query::query::select::SelectStatement">SelectStatement</a></h4></section></div></details><details class="rustdoc-toggle implementors-toggle"><summary><section id="impl-QuerySelect-for-SelectTwoMany%3CE%2C%20F%3E" class="impl has-srclink"><a class="srclink rightside" href="../../src/sea_orm/query/select.rs.html#87">source</a><a href="#impl-QuerySelect-for-SelectTwoMany%3CE%2C%20F%3E" class="anchor">§</a><h3 class="code-header">impl&lt;E, F&gt; <a class="trait" href="trait.QuerySelect.html" title="trait sea_orm::query::QuerySelect">QuerySelect</a> for <a class="struct" href="struct.SelectTwoMany.html" title="struct sea_orm::query::SelectTwoMany">SelectTwoMany</a>&lt;E, F&gt;<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;E: <a class="trait" href="../entity/prelude/trait.EntityTrait.html" title="trait sea_orm::entity::prelude::EntityTrait">EntityTrait</a>,<br>&nbsp;&nbsp;&nbsp;&nbsp;F: <a class="trait" href="../entity/prelude/trait.EntityTrait.html" title="trait sea_orm::entity::prelude::EntityTrait">EntityTrait</a>,</span></h3></section></summary><div class="impl-items"><section id="associatedtype.QueryStatement-3" class="associatedtype trait-impl has-srclink"><a href="#associatedtype.QueryStatement-3" class="anchor">§</a><h4 class="code-header">type <a href="#associatedtype.QueryStatement" class="associatedtype">QueryStatement</a> = <a class="struct" href="../../sea_query/query/select/struct.SelectStatement.html" title="struct sea_query::query::select::SelectStatement">SelectStatement</a></h4></section></div></details></div><script src="../../implementors/sea_orm/query/helper/trait.QuerySelect.js" async></script></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="sea_orm" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0-nightly (d6f99e535 2023-01-02)" data-search-js="search-181581080540673f.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-58836c674e2f7bd2.css" ></div></body></html>

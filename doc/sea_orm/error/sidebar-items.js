@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["DbErr","An error from unsuccessful database operations"],["RuntimeErr","Runtime error"]],"struct":[["ColumnFromStrErr","Error during `impl FromStr for Entity::Column`"]]};

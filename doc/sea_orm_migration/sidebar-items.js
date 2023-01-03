@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["DbErr","An error from unsuccessful database operations"]],"mod":[["cli",""],["manager",""],["migrator",""],["prelude",""],["seaql_migrations",""],["util",""]],"trait":[["MigrationName",""],["MigrationTrait","The migration definition"]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["def",""],["discovery","To query & parse MySQL’s INFORMATION_SCHEMA and construct a [`Schema`]"],["parser",""],["probe",""],["query",""],["writer",""]],"struct":[["Postgres",""]]};

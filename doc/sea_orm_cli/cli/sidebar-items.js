@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["Commands",""],["DateTimeCrate",""],["GenerateSubcommands",""],["MigrateSubcommands",""]],"struct":[["Cli",""]]};

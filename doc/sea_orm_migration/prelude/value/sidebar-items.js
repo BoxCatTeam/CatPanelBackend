@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["ArrayType","[`Value`] types variant for Postgres array"],["Value","Value variants"],["ValueTuple",""]],"fn":[["sea_value_to_json_value","Convert value to json value"]],"mod":[["time_format",""]],"struct":[["ValueTypeErr",""],["Values",""]],"trait":[["FromValueTuple",""],["IntoValueTuple",""],["Nullable",""],["ValueType",""]]};

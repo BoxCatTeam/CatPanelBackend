@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["KeyColumnUsageFields","Ref: https://www.postgresql.org/docs/13/infoschema-key-column-usage.html"]]};

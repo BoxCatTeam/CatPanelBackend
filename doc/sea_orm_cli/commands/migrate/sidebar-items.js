@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["run_migrate_command",""],["run_migrate_generate",""],["run_migrate_init",""]]};

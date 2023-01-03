@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="This crate provides utility functions to perform a graceful shutdown on tokio-rs based services."><meta name="keywords" content="rust, rustlang, rust-lang, tokio_graceful_shutdown"><title>tokio_graceful_shutdown - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-303867cd4f9d7e56.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../crates.js"></script><script defer src="../static.files/main-4a084badb5778746.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../tokio_graceful_shutdown/index.html"><div class="logo-container"><img class="rust-logo" src="../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../tokio_graceful_shutdown/index.html"><div class="logo-container"><img class="rust-logo" src="../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></div></a><h2 class="location"><a href="#">Crate tokio_graceful_shutdown</a></h2><div class="sidebar-elems"><ul class="block"><li class="version">Version 0.12.1</li><li><a id="all-types" href="all.html">All Items</a></li></ul><section><ul class="block"><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li></ul></section></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Crate <a class="mod" href="#">tokio_graceful_shutdown</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../src/tokio_graceful_shutdown/lib.rs.html#1-123">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>This crate provides utility functions to perform a graceful shutdown on tokio-rs based services.</p>
+<p>Specifically, it provides:</p>
+<ul>
+<li>Listening for shutdown requests from within subsystems</li>
+<li>Manual shutdown initiation from within subsystems</li>
+<li>Automatic shutdown on
+<ul>
+<li>SIGINT/SIGTERM/Ctrl+C</li>
+<li>Subsystem failure</li>
+<li>Subsystem panic</li>
+</ul>
+</li>
+<li>Clean shutdown procedure with timeout and error propagation</li>
+<li>Subsystem nesting</li>
+<li>Partial shutdown of a selected subsystem tree</li>
+</ul>
+<h2 id="example"><a href="#example">Example</a></h2>
+<p>This example shows a minimal example of how to launch an asynchronous subsystem with the help of this crate.</p>
+<p>It contains a countdown subsystem that will end the program after 10 seconds.
+During the countdown, the program will react to Ctrl-C/SIGINT/SIGTERM and will cancel the countdown task accordingly.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>miette::Result;
+<span class="kw">use </span>tokio_graceful_shutdown::{SubsystemHandle, Toplevel};
+<span class="kw">use </span>env_logger::{Builder, Env};
+<span class="kw">use </span>tokio::time::{sleep, Duration};
+
+<span class="kw">async fn </span>countdown() {
+    <span class="kw">for </span>i <span class="kw">in </span>(<span class="number">1</span>..=<span class="number">5</span>).rev() {
+        <span class="macro">log::info!</span>(<span class="string">&quot;Shutting down in: {}&quot;</span>, i);
+        sleep(Duration::from_millis(<span class="number">1000</span>)).<span class="kw">await</span>;
+    }
+}
+
+<span class="kw">async fn </span>countdown_subsystem(subsys: SubsystemHandle) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="macro">tokio::select! </span>{
+        <span class="kw">_ </span>= subsys.on_shutdown_requested() =&gt; {
+            <span class="macro">log::info!</span>(<span class="string">&quot;Countdown cancelled.&quot;</span>);
+        },
+        <span class="kw">_ </span>= countdown() =&gt; {
+            subsys.request_shutdown();
+        }
+    };
+
+    <span class="prelude-val">Ok</span>(())
+}
+
+<span class="attr">#[tokio::main]
+</span><span class="kw">async fn </span>main() -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="comment">// Init logging
+    </span>Builder::from_env(Env::default().default_filter_or(<span class="string">&quot;debug&quot;</span>)).init();
+
+    <span class="comment">// Create toplevel
+    </span>Toplevel::new()
+        .start(<span class="string">&quot;Countdown&quot;</span>, countdown_subsystem)
+        .catch_signals()
+        .handle_shutdown_requests(Duration::from_millis(<span class="number">1000</span>))
+        .<span class="kw">await
+        </span>.map_err(Into::into)
+}</code></pre></div>
+<p>There are a couple of things to note here.</p>
+<p>For one, the <a href="struct.Toplevel.html" title="Toplevel"><code>Toplevel</code></a> object represents the root object of the subsystem tree
+and is the main entry point of how to interact with this crate.
+Subsystems can then be started using the <a href="struct.Toplevel.html#method.start"><code>start()</code></a> functionality of the toplevel object.</p>
+<p>The <a href="struct.Toplevel.html#method.catch_signals"><code>catch_signals()</code></a> method signals the <code>Toplevel</code> object to listen for SIGINT/SIGTERM/Ctrl+C and initiate a shutdown thereafter.</p>
+<p><a href="struct.Toplevel.html#method.handle_shutdown_requests"><code>handle_shutdown_requests()</code></a> is the final and most important method of <code>Toplevel</code>. It idles until the program enters the shutdown mode. Then, it collects all the return values of the subsystems, determines the global error state and makes sure the shutdown happens within the given timeout.
+Lastly, it returns an error value that can be directly used as a return code for <code>main()</code>.</p>
+<p>Further, the way to register and start a new submodule ist to provide
+a submodule function/lambda to <a href="struct.Toplevel.html#method.start" title="Toplevel::start"><code>Toplevel::start</code></a> or
+<a href="struct.SubsystemHandle.html#method.start" title="SubsystemHandle::start"><code>SubsystemHandle::start</code></a>.
+If additional arguments shall to be provided to the submodule, it is necessary to create
+a submodule <code>struct</code>. Further details can be seen in the <code>examples</code> folder of the repository.</p>
+<p>Finally, you can see the <a href="struct.SubsystemHandle.html" title="SubsystemHandle"><code>SubsystemHandle</code></a> object that gets provided to the subsystem.
+It is the main way of the subsystem to communicate with this crate.
+It enables the subsystem to start nested subsystems, to react to shutdown requests or
+to initiate a shutdown.</p>
+</div></details><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="errors/index.html" title="tokio_graceful_shutdown::errors mod">errors</a></div><div class="item-right docblock-short">All the errors that can be caused by this crate.</div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.NestedSubsystem.html" title="tokio_graceful_shutdown::NestedSubsystem struct">NestedSubsystem</a></div><div class="item-right docblock-short">A nested subsystem. Can be used to perform a partial shutdown.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.SubsystemHandle.html" title="tokio_graceful_shutdown::SubsystemHandle struct">SubsystemHandle</a></div><div class="item-right docblock-short">The handle given to each subsystem through which the subsystem can interact with this crate.</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Toplevel.html" title="tokio_graceful_shutdown::Toplevel struct">Toplevel</a></div><div class="item-right docblock-short">Acts as the base for the subsystem tree and forms the entry point for
+any interaction with this crate.</div></div></div><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2><div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.ErrTypeTraits.html" title="tokio_graceful_shutdown::ErrTypeTraits trait">ErrTypeTraits</a></div><div class="item-right docblock-short">A collection of traits a custom error has to fulfill in order to be
+usable as the <code>ErrType</code> of <a href="struct.Toplevel.html" title="Toplevel">Toplevel</a>.</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.FutureExt.html" title="tokio_graceful_shutdown::FutureExt trait">FutureExt</a></div><div class="item-right docblock-short">Extends the <a href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="std::future::Future">std::future::Future</a> trait with useful utility functions.</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.IntoSubsystem.html" title="tokio_graceful_shutdown::IntoSubsystem trait">IntoSubsystem</a></div><div class="item-right docblock-short">Allows a struct to be used as a subsystem.</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="tokio_graceful_shutdown" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0-nightly (d6f99e535 2023-01-02)" data-search-js="search-181581080540673f.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-58836c674e2f7bd2.css" ></div></body></html>

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["IntoHandler","A [`Handler`] created from a [`HandlerCallWithExtractors`]."],["Or","[`Handler`] that runs one [`Handler`] and if that rejects it’ll fallback to another [`Handler`]."]],"trait":[["HandlerCallWithExtractors","Trait for async functions that can be used to handle requests."]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["SimpleExpr","Represents a Simple Expression in SQL."]],"struct":[["Expr","Helper to build a [`SimpleExpr`]."]]};

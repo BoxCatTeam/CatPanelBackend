@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Derive an implementation of `FromRequest`."><meta name="keywords" content="rust, rustlang, rust-lang, FromRequest"><title>FromRequest in axum::extract - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-303867cd4f9d7e56.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-4a084badb5778746.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc derive"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../axum/index.html"><div class="logo-container"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../axum/index.html"><div class="logo-container"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></div></a><div class="sidebar-elems"><h2><a href="index.html">In axum::extract</a></h2></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Derive Macro <a href="../index.html">axum</a>::<wbr><a href="index.html">extract</a>::<wbr><a class="derive" href="#">FromRequest</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../../src/axum_macros/lib.rs.html#355">source</a> · <button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><div class="item-decl"><pre class="rust derive"><code>#[derive(FromRequest)]
+{
+    // Attributes available to this derive:
+    #[from_request]
+}
+</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Derive an implementation of <a href="https://docs.rs/axum/latest/axum/extract/trait.FromRequest.html"><code>FromRequest</code></a>.</p>
+<p>Supports generating two kinds of implementations:</p>
+<ol>
+<li>One that extracts each field individually.</li>
+<li>Another that extracts the whole type at once via another extractor.</li>
+</ol>
+<h2 id="each-field-individually"><a href="#each-field-individually">Each field individually</a></h2>
+<p>By default <code>#[derive(FromRequest)]</code> will call <code>FromRequest::from_request</code> for each field:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum_macros::FromRequest;
+<span class="kw">use </span>axum::{
+    extract::{Extension, TypedHeader},
+    headers::ContentType,
+    body::Bytes,
+};
+
+<span class="attr">#[derive(FromRequest)]
+</span><span class="kw">struct </span>MyExtractor {
+    state: Extension&lt;State&gt;,
+    content_type: TypedHeader&lt;ContentType&gt;,
+    request_body: Bytes,
+}
+
+<span class="attr">#[derive(Clone)]
+</span><span class="kw">struct </span>State {
+    <span class="comment">// ...
+</span>}
+
+<span class="kw">async fn </span>handler(extractor: MyExtractor) {}</code></pre></div>
+<p>This requires that each field is an extractor (i.e. implements <a href="https://docs.rs/axum/latest/axum/extract/trait.FromRequest.html"><code>FromRequest</code></a>).</p>
+<p>Note that only the last field can consume the request body. Therefore this doesn’t compile:</p>
+
+<div class="example-wrap compile_fail"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum_macros::FromRequest;
+<span class="kw">use </span>axum::body::Bytes;
+
+<span class="attr">#[derive(FromRequest)]
+</span><span class="kw">struct </span>MyExtractor {
+    <span class="comment">// only the last field can implement `FromRequest`
+    // other fields must only implement `FromRequestParts`
+    </span>bytes: Bytes,
+    string: String,
+}</code></pre></div>
+<h3 id="extracting-via-another-extractor"><a href="#extracting-via-another-extractor">Extracting via another extractor</a></h3>
+<p>You can use <code>#[from_request(via(...))]</code> to extract a field via another extractor, meaning the
+field itself doesn’t need to implement <code>FromRequest</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum_macros::FromRequest;
+<span class="kw">use </span>axum::{
+    extract::{Extension, TypedHeader},
+    headers::ContentType,
+    body::Bytes,
+};
+
+<span class="attr">#[derive(FromRequest)]
+</span><span class="kw">struct </span>MyExtractor {
+    <span class="comment">// This will extracted via `Extension::&lt;State&gt;::from_request`
+    </span><span class="attr">#[from_request(via(Extension))]
+    </span>state: State,
+    <span class="comment">// and this via `TypedHeader::&lt;ContentType&gt;::from_request`
+    </span><span class="attr">#[from_request(via(TypedHeader))]
+    </span>content_type: ContentType,
+    <span class="comment">// Can still be combined with other extractors
+    </span>request_body: Bytes,
+}
+
+<span class="attr">#[derive(Clone)]
+</span><span class="kw">struct </span>State {
+    <span class="comment">// ...
+</span>}
+
+<span class="kw">async fn </span>handler(extractor: MyExtractor) {}</code></pre></div>
+<p>Note this requires the via extractor to be a generic newtype struct (a tuple struct with
+exactly one public field) that implements <code>FromRequest</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">pub struct </span>ViaExtractor&lt;T&gt;(<span class="kw">pub </span>T);
+
+<span class="comment">// impl&lt;T, S, B&gt; FromRequest&lt;S, B&gt; for ViaExtractor&lt;T&gt; { ... }</span></code></pre></div>
+<p>More complex via extractors are not supported and require writing a manual implementation.</p>
+<h3 id="optional-fields"><a href="#optional-fields">Optional fields</a></h3>
+<p><code>#[from_request(via(...))]</code> supports <code>Option&lt;_&gt;</code> and <code>Result&lt;_, _&gt;</code> to make fields optional:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum_macros::FromRequest;
+<span class="kw">use </span>axum::{
+    extract::{TypedHeader, rejection::TypedHeaderRejection},
+    headers::{ContentType, UserAgent},
+};
+
+<span class="attr">#[derive(FromRequest)]
+</span><span class="kw">struct </span>MyExtractor {
+    <span class="comment">// This will extracted via `Option::&lt;TypedHeader&lt;ContentType&gt;&gt;::from_request`
+    </span><span class="attr">#[from_request(via(TypedHeader))]
+    </span>content_type: <span class="prelude-ty">Option</span>&lt;ContentType&gt;,
+    <span class="comment">// This will extracted via
+    // `Result::&lt;TypedHeader&lt;UserAgent&gt;, TypedHeaderRejection&gt;::from_request`
+    </span><span class="attr">#[from_request(via(TypedHeader))]
+    </span>user_agent: <span class="prelude-ty">Result</span>&lt;UserAgent, TypedHeaderRejection&gt;,
+}
+
+<span class="kw">async fn </span>handler(extractor: MyExtractor) {}</code></pre></div>
+<h3 id="the-rejection"><a href="#the-rejection">The rejection</a></h3>
+<p>By default <a href="https://docs.rs/axum/0.6/axum/response/type.Response.html"><code>axum::response::Response</code></a> will be used as the rejection. You can also use your own
+rejection type with <code>#[from_request(rejection(YourType))]</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum::{
+    extract::{
+        rejection::{ExtensionRejection, StringRejection},
+        FromRequest,
+    },
+    Extension,
+    response::{Response, IntoResponse},
+};
+
+<span class="attr">#[derive(FromRequest)]
+#[from_request(rejection(MyRejection))]
+</span><span class="kw">struct </span>MyExtractor {
+    state: Extension&lt;String&gt;,
+    body: String,
+}
+
+<span class="kw">struct </span>MyRejection(Response);
+
+<span class="comment">// This tells axum how to convert `Extension`&#39;s rejections into `MyRejection`
+</span><span class="kw">impl </span>From&lt;ExtensionRejection&gt; <span class="kw">for </span>MyRejection {
+    <span class="kw">fn </span>from(rejection: ExtensionRejection) -&gt; <span class="self">Self </span>{
+        <span class="comment">// ...
+    </span>}
+}
+
+<span class="comment">// This tells axum how to convert `String`&#39;s rejections into `MyRejection`
+</span><span class="kw">impl </span>From&lt;StringRejection&gt; <span class="kw">for </span>MyRejection {
+    <span class="kw">fn </span>from(rejection: StringRejection) -&gt; <span class="self">Self </span>{
+        <span class="comment">// ...
+    </span>}
+}
+
+<span class="comment">// All rejections must implement `IntoResponse`
+</span><span class="kw">impl </span>IntoResponse <span class="kw">for </span>MyRejection {
+    <span class="kw">fn </span>into_response(<span class="self">self</span>) -&gt; Response {
+        <span class="self">self</span>.<span class="number">0
+    </span>}
+}</code></pre></div>
+<h2 id="the-whole-type-at-once"><a href="#the-whole-type-at-once">The whole type at once</a></h2>
+<p>By using <code>#[from_request(via(...))]</code> on the container you can extract the whole type at once,
+instead of each field individually:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum_macros::FromRequest;
+<span class="kw">use </span>axum::extract::Extension;
+
+<span class="comment">// This will extracted via `Extension::&lt;State&gt;::from_request`
+</span><span class="attr">#[derive(Clone, FromRequest)]
+#[from_request(via(Extension))]
+</span><span class="kw">struct </span>State {
+    <span class="comment">// ...
+</span>}
+
+<span class="kw">async fn </span>handler(state: State) {}</code></pre></div>
+<p>The rejection will be the “via extractors”’s rejection. For the previous example that would be
+<a href="https://docs.rs/axum/latest/axum/extract/rejection/enum.ExtensionRejection.html"><code>axum::extract::rejection::ExtensionRejection</code></a>.</p>
+<p>You can use a different rejection type with <code>#[from_request(rejection(YourType))]</code>:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum_macros::FromRequest;
+<span class="kw">use </span>axum::{
+    extract::{Extension, rejection::ExtensionRejection},
+    response::{IntoResponse, Response},
+    Json,
+    http::StatusCode,
+};
+<span class="kw">use </span>serde_json::json;
+
+<span class="comment">// This will extracted via `Extension::&lt;State&gt;::from_request`
+</span><span class="attr">#[derive(Clone, FromRequest)]
+#[from_request(
+    via(Extension),
+    <span class="comment">// Use your own rejection type
+    </span>rejection(MyRejection),
+)]
+</span><span class="kw">struct </span>State {
+    <span class="comment">// ...
+</span>}
+
+<span class="kw">struct </span>MyRejection(Response);
+
+<span class="comment">// This tells axum how to convert `Extension`&#39;s rejections into `MyRejection`
+</span><span class="kw">impl </span>From&lt;ExtensionRejection&gt; <span class="kw">for </span>MyRejection {
+    <span class="kw">fn </span>from(rejection: ExtensionRejection) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>response = (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(<span class="macro">json!</span>({ <span class="string">&quot;error&quot;</span>: <span class="string">&quot;Something went wrong...&quot; </span>})),
+        ).into_response();
+
+        MyRejection(response)
+    }
+}
+
+<span class="comment">// All rejections must implement `IntoResponse`
+</span><span class="kw">impl </span>IntoResponse <span class="kw">for </span>MyRejection {
+    <span class="kw">fn </span>into_response(<span class="self">self</span>) -&gt; Response {
+        <span class="self">self</span>.<span class="number">0
+    </span>}
+}
+
+<span class="kw">async fn </span>handler(state: State) {}</code></pre></div>
+<p>This allows you to wrap other extractors and easily customize the rejection:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>axum_macros::FromRequest;
+<span class="kw">use </span>axum::{
+    extract::{Extension, rejection::JsonRejection},
+    response::{IntoResponse, Response},
+    http::StatusCode,
+};
+<span class="kw">use </span>serde_json::json;
+<span class="kw">use </span>serde::Deserialize;
+
+<span class="comment">// create an extractor that internally uses `axum::Json` but has a custom rejection
+</span><span class="attr">#[derive(FromRequest)]
+#[from_request(via(axum::Json), rejection(MyRejection))]
+</span><span class="kw">struct </span>MyJson&lt;T&gt;(T);
+
+<span class="kw">struct </span>MyRejection(Response);
+
+<span class="kw">impl </span>From&lt;JsonRejection&gt; <span class="kw">for </span>MyRejection {
+    <span class="kw">fn </span>from(rejection: JsonRejection) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>response = (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            axum::Json(<span class="macro">json!</span>({ <span class="string">&quot;error&quot;</span>: rejection.to_string() })),
+        ).into_response();
+
+        MyRejection(response)
+    }
+}
+
+<span class="kw">impl </span>IntoResponse <span class="kw">for </span>MyRejection {
+    <span class="kw">fn </span>into_response(<span class="self">self</span>) -&gt; Response {
+        <span class="self">self</span>.<span class="number">0
+    </span>}
+}
+
+<span class="attr">#[derive(Deserialize)]
+</span><span class="kw">struct </span>Payload {}
+
+<span class="kw">async fn </span>handler(
+    <span class="comment">// make sure to use `MyJson` and not `axum::Json`
+    </span>MyJson(payload): MyJson&lt;Payload&gt;,
+) {}</code></pre></div>
+<h2 id="known-limitations"><a href="#known-limitations">Known limitations</a></h2>
+<p>Generics are only supported on tuple structs with exactly on field. Thus this doesn’t work</p>
+
+<div class="example-wrap compile_fail"><div class='tooltip'>ⓘ</div><pre class="rust rust-example-rendered"><code><span class="attr">#[derive(axum_macros::FromRequest)]
+</span><span class="kw">struct </span>MyExtractor&lt;T&gt; {
+    thing: <span class="prelude-ty">Option</span>&lt;T&gt;,
+}</code></pre></div>
+</div></details></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="axum" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0-nightly (d6f99e535 2023-01-02)" data-search-js="search-181581080540673f.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-58836c674e2f7bd2.css" ></div></body></html>

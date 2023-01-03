@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["CheckConstraintsFields","Ref: https://www.postgresql.org/docs/13/infoschema-check-constraints.html"]]};

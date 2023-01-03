@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["deserialize","Deserialize an `Option<Duration>` or `Option<SystemTime>`"],["serialize","Serializes an `Option<Duration>` or `Option<SystemTime>`"]]};

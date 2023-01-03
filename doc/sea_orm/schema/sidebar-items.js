@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Schema","This is a helper struct to convert `EntityTrait` into different `sea_query` statements."]]};

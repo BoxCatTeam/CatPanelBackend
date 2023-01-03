@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["SmolStr","A `SmolStr` is a string type that has the following properties:"]]};

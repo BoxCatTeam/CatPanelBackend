@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"sea_orm_cli":[["impl <a class=\"trait\" href=\"clap/derive/trait.ValueEnum.html\" title=\"trait clap::derive::ValueEnum\">ValueEnum</a> for <a class=\"enum\" href=\"sea_orm_cli/cli/enum.DateTimeCrate.html\" title=\"enum sea_orm_cli::cli::DateTimeCrate\">DateTimeCrate</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

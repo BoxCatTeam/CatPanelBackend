@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["cookie","Cookie parsing and cookie jar management."]],"struct":[["Cached","Cache results of other extractors."],["SignedCookieJar","Extractor that grabs signed cookies from the request and manages the jar."],["WithRejection","Extractor for customizing extractor rejections"]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["SchemaManager","Helper struct for writing migration scripts in migration file"]]};

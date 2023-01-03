@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"derive":[["FromAttributes","See root module docs for more info."]]};

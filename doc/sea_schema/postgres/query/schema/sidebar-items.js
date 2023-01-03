@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["InformationSchema","Ref: https://www.postgresql.org/docs/13/information-schema.html"]],"struct":[["SchemaQueryBuilder",""]]};

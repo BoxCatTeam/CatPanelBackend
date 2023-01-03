@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":[["char_set",""],["column",""],["constraints",""],["enumeration",""],["schema",""],["table",""]]};
