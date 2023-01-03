@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["__rg_alloc",""],["__rg_alloc_zeroed",""],["__rg_dealloc",""],["__rg_realloc",""],["main",""]],"mod":[["configure",""],["http",""],["log",""]],"static":[["ALLOC",""],["CALLSITE",""],["META",""]]};
+window.SIDEBAR_ITEMS = {"fn":[["__rg_alloc",""],["__rg_alloc_zeroed",""],["__rg_dealloc",""],["__rg_realloc",""],["main",""],["main2",""]],"mod":[["configure",""],["http",""],["log",""]],"opaque":[["",""]],"static":[["ALLOC",""],["CALLSITE",""],["META",""]]};
