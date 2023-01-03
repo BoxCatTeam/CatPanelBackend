@@ -440,6 +440,9 @@ impl LimitedRefreshSystem {
         self.system.read().await
     }
 
+    #[cold]
+    #[deprecated]
+    #[allow(unused)]
     async fn maybe_refresh(
         &self,
         key: RefreshKey,
