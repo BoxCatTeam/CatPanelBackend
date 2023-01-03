@@ -8,11 +8,11 @@ use tracing::info;
 use crate::configure::get_config;
 use crate::http::rocksdb_session_store::RocksdbStore;
 
+mod error;
+mod model;
 mod rocksdb_session_store;
 mod routes;
 mod ws;
-mod error;
-mod model;
 
 pub async fn start_http_server(handle: SubsystemHandle) -> anyhow::Result<()> {
     let app = Router::new()

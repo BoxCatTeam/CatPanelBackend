@@ -1,5 +1,5 @@
-use async_graphql::{EmptyMutation, EmptySubscription, Object, Schema};
 use crate::http::model::system_info::SystemInfo;
+use async_graphql::{EmptyMutation, EmptySubscription, Object, Schema};
 
 mod system_info;
 

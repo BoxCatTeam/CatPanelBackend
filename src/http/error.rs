@@ -10,10 +10,7 @@ pub struct Error {
 
 impl Error {
     pub fn status(code: StatusCode, msg: String) -> Self {
-        Error {
-            code,
-            msg,
-        }
+        Error { code, msg }
     }
 }
 
