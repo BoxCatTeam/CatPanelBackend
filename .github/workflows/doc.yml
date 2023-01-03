@@ -15,7 +15,8 @@ jobs:
           override: true
       - uses: actions-rs/cargo@v1
         with:
-          command: doc --timings
+          command: doc
+          args: --timings
       - uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: target/doc
