@@ -129,6 +129,7 @@ pub struct DiskInfo {
     /// 磁盘类型
     r#type: DiskType,
     /// 磁盘名字
+    /// 但磁盘名字可能含有非法unicode字符, 这个情况下会被替换为`U+FFFD`
     name: SmolStr,
     //file_system: &[u8]?????
     /// 挂载点
@@ -277,6 +278,57 @@ impl SystemInfo {
                     system.refresh_disks();
                 },
                 |system| system.disks().iter().map(Into::into).collect(),
+            )
+            .await)
+    }
+
+    /// 使用磁盘名字查询单个磁盘的信息
+    /// 但是磁盘名字可能包含非法unicode, 所以还提供了`disk_by_mount_point`方法供可能需要时使用
+    async fn disk_by_name(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(desc = "磁盘名字")] disk_name: SmolStr,
+    ) -> async_graphql::Result<Option<DiskInfo>> {
+        Ok(ctx
+            .data::<LimitedRefreshSystem>()?
+            .maybe_refresh_nonblocking(
+                RefreshKey::Disk,
+                |system| {
+                    system.refresh_disks_list();
+                    system.refresh_disks();
+                },
+                move |system| {
+                    system
+                        .disks()
+                        .iter()
+                        .find(|disk| *disk.name().to_string_lossy() == disk_name)
+                        .map(Into::into)
+                },
+            )
+            .await)
+    }
+
+    /// 使用磁盘挂载点查询单个磁盘的信息
+    async fn disk_by_mount_point(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(desc = "磁盘挂载点")] mount_point: SmolStr,
+    ) -> async_graphql::Result<Option<DiskInfo>> {
+        Ok(ctx
+            .data::<LimitedRefreshSystem>()?
+            .maybe_refresh_nonblocking(
+                RefreshKey::Disk,
+                |system| {
+                    system.refresh_disks_list();
+                    system.refresh_disks();
+                },
+                move |system| {
+                    system
+                        .disks()
+                        .iter()
+                        .find(|disk| disk.mount_point().display().to_string() == mount_point)
+                        .map(Into::into)
+                },
             )
             .await)
     }
