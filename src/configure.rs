@@ -17,9 +17,7 @@ pub fn init_configure() -> anyhow::Result<()> {
     }
     let config = reload()?;
     #[cfg(test)]
-    CONFIG
-        .set(ArcSwap::from_pointee(config))
-        .ok();
+    CONFIG.set(ArcSwap::from_pointee(config)).ok();
     #[cfg(not(test))]
     CONFIG
         .set(ArcSwap::from_pointee(config))
