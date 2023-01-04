@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/http/model/system_info.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>system_info.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-303867cd4f9d7e56.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../static.files/main-4a084badb5778746.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../cat_panel_backend/index.html"><img class="rust-logo" src="../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/http/model/system_info.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>system_info.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-94f503864730768f.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../../source-files.js"></script><script defer src="../../../../static.files/main-4a084badb5778746.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../cat_panel_backend/index.html"><img class="rust-logo" src="../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -531,6 +531,26 @@
 <a href="#531" id="531">531</a>
 <a href="#532" id="532">532</a>
 <a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
+<a href="#545" id="545">545</a>
+<a href="#546" id="546">546</a>
+<a href="#547" id="547">547</a>
+<a href="#548" id="548">548</a>
+<a href="#549" id="549">549</a>
+<a href="#550" id="550">550</a>
+<a href="#551" id="551">551</a>
+<a href="#552" id="552">552</a>
+<a href="#553" id="553">553</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::{Duration, Instant};
 
@@ -546,7 +566,9 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::configure::get_config;
 
-<span class="macro">macro_rules! </span>simple_system_info_object {
+<span class="doccomment">/// 生成一些简单的impl块
+/// 主要是可以直接用`system.xx()`调用的不需要手动映射类型的简单方法
+</span><span class="macro">macro_rules! </span>simple_system_info_object {
     (@<span class="macro-nonterminal">$impl_name</span>:ident; $($(<span class="attr">#[<span class="macro-nonterminal">$attr</span>:meta]</span>)* <span class="macro-nonterminal">$name</span>:ident -&gt; <span class="macro-nonterminal">$ret</span>:ty;)<span class="kw-2">*</span>) =&gt; {
         <span class="attr">#[Object]
         </span><span class="kw">impl </span><span class="macro-nonterminal">$impl_name </span>{
@@ -933,7 +955,9 @@
     }
 }
 
-<span class="attr">#[derive(Copy, Clone, Hash, PartialEq, Eq)]
+<span class="doccomment">/// 分开不同的类型来创建多个不同的限制
+/// 避免刷新一种类型的信息导致其他没刷新的信息也进入&quot;cd&quot;
+</span><span class="attr">#[derive(Copy, Clone, Hash, PartialEq, Eq)]
 </span><span class="kw">pub enum </span>RefreshKey {
     Cpu,
     Memory,
@@ -942,13 +966,15 @@
     Component,
 }
 
-<span class="kw">pub struct </span>LimitedRefreshSystem {
+<span class="doccomment">/// 可限制刷新频率的`sysinfo::System`
+</span><span class="kw">pub struct </span>LimitedRefreshSystem {
     system: Arc&lt;RwLock&lt;System&gt;&gt;,
     last_refresh: FnvHashMap&lt;RefreshKey, AtomicCell&lt;Instant&gt;&gt;,
     limit: Duration,
 }
 
-<span class="kw">fn </span>new_last_refresh_map() -&gt; FnvHashMap&lt;RefreshKey, AtomicCell&lt;Instant&gt;&gt; {
+<span class="doccomment">/// 创建包含全部类型的hashmap，这个map必须包含全部的`RefreshKey`
+</span><span class="kw">fn </span>new_last_refresh_map() -&gt; FnvHashMap&lt;RefreshKey, AtomicCell&lt;Instant&gt;&gt; {
     <span class="kw">let </span>now = || AtomicCell::new(Instant::now());
     <span class="kw">let </span><span class="kw-2">mut </span>map = FnvHashMap::default();
     map.insert(RefreshKey::Cpu, now());
@@ -973,7 +999,11 @@
         <span class="self">self</span>.system.read().<span class="kw">await
     </span>}
 
-    <span class="attr">#[cold]
+    <span class="doccomment">/// 同步的刷新函数
+    /// 执行指定类型的刷新，具体刷新什么由输入的闭包`f`决定
+    ///
+    /// 该函数已经弃用，转为使用非阻塞的`maybe_refresh_nonblocking`
+    </span><span class="attr">#[cold]
     #[deprecated]
     #[allow(unused)]
     </span><span class="kw">async fn </span>maybe_refresh(
@@ -992,7 +1022,10 @@
         </span>}
     }
 
-    <span class="kw">async fn </span>maybe_refresh_nonblocking&lt;R&gt;(
+    <span class="doccomment">/// `maybe_refresh`的异步非阻塞版本
+    ///
+    /// `read_fn`: 由于`spawn_blocking`的`&#39;static`生命周期限制，所以读取数据也要一并在执行刷新的线程中执行
+    </span><span class="kw">async fn </span>maybe_refresh_nonblocking&lt;R&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         key: RefreshKey,
         refresh_fn: <span class="kw">impl </span>FnOnce(<span class="kw-2">&amp;mut </span>System) + Send + <span class="lifetime">&#39;static</span>,
@@ -1001,26 +1034,33 @@
     <span class="kw">where
         </span>R: Send + <span class="lifetime">&#39;static</span>,
     {
-        <span class="kw">if </span><span class="self">self</span>.safe_get_last_refresh_unchecked(key).load().elapsed() &gt; <span class="self">self</span>.limit {
+        <span class="comment">// 如果距离上次刷新的时间大于限制时间
+        </span><span class="kw">if </span><span class="self">self</span>.safe_get_last_refresh_unchecked(key).load().elapsed() &gt; <span class="self">self</span>.limit {
             <span class="kw">let </span>system = <span class="self">self</span>.system.clone();
-            <span class="kw">let </span>ret = tokio::task::spawn_blocking(<span class="kw">move </span>|| {
-                <span class="kw">let </span><span class="kw-2">mut </span>system = system.blocking_write();
+            <span class="comment">// 在tokio的阻塞专用线程池中执行刷新和读取数据的闭包
+            </span><span class="kw">let </span>ret = tokio::task::spawn_blocking(<span class="kw">move </span>|| {
+                <span class="comment">// 同步获取写锁
+                </span><span class="kw">let </span><span class="kw-2">mut </span>system = system.blocking_write();
                 refresh_fn(<span class="kw-2">&amp;mut </span>system);
-                read_fn(<span class="kw-2">&amp;</span>system.downgrade())
+                <span class="comment">// 回退为读锁再进行数据读取
+                // 因为同时间可能有其他task在试图读取system，先回退为读锁可以允许其他异步task获取读锁
+                </span>read_fn(<span class="kw-2">&amp;</span>system.downgrade())
             })
             .<span class="kw">await
             </span><span class="comment">// join error是因为task里面panic或者task被abort了
             // 而task里的panic的情况下应该与`maybe_refresh`保持一致
             </span>.expect(<span class="string">&quot;maybe_refresh_nonblocking&quot;</span>);
-            <span class="self">self</span>.safe_get_last_refresh_unchecked(key)
+            <span class="comment">// 更新完毕，将上次刷新时间更改为现在
+            </span><span class="self">self</span>.safe_get_last_refresh_unchecked(key)
                 .store(Instant::now());
             ret
         } <span class="kw">else </span>{
-            read_fn(<span class="kw-2">&amp;*</span><span class="self">self</span>.system().<span class="kw">await</span>)
+            <span class="comment">// 在&quot;cd&quot;内，不需要刷新，直接获取读锁读取数据
+            </span>read_fn(<span class="kw-2">&amp;*</span><span class="self">self</span>.system().<span class="kw">await</span>)
         }
     }
 
-    <span class="comment">// SAFETY: 全部RefreshKey都应该在hashmap里面
+    <span class="comment">// SAFETY: 全部RefreshKey都应该已经在`new_last_refresh_map`时插入
     </span><span class="attr">#[inline]
     </span><span class="kw">fn </span>safe_get_last_refresh_unchecked(<span class="kw-2">&amp;</span><span class="self">self</span>, key: RefreshKey) -&gt; <span class="kw-2">&amp;</span>AtomicCell&lt;Instant&gt; {
         <span class="kw">unsafe </span>{ <span class="self">self</span>.last_refresh.get(<span class="kw-2">&amp;</span>key).unwrap_unchecked() }
@@ -1065,4 +1105,4 @@
     <span class="prelude-val">Ok</span>(())
 }
 </code></pre></div>
-</section></main><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="cat_panel_backend" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0-nightly (d6f99e535 2023-01-02)" data-search-js="search-181581080540673f.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-58836c674e2f7bd2.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="cat_panel_backend" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.0-nightly (c7572670a 2023-01-03)" data-search-js="search-181581080540673f.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-58836c674e2f7bd2.css" ></div></body></html>
