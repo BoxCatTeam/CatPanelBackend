@@ -19,6 +19,7 @@ use tracing_subscriber::Layer;
 
 const LOG_DIR: &str = "logs";
 
+// 返回一个Future，用于等待异步的日志文件写入协程结束
 pub fn init_tracing_subscriber() -> impl Future<Output = anyhow::Result<()>> {
     let mut layers = Vec::with_capacity(2);
 
@@ -54,6 +55,7 @@ pub fn init_tracing_subscriber() -> impl Future<Output = anyhow::Result<()>> {
                     .and_then(|var| LevelFilter::from_str(&var).ok())
                     .unwrap_or(LevelFilter::DEBUG),
             )
+            // 过滤掉由`log_file_writer`发出的日志，避免记录自己发出的日志导致死循环
             .with_filter(tracing_subscriber::filter::filter_fn(|metadata| {
                 metadata.target() != "log_file_writer"
             }))
@@ -63,7 +65,9 @@ pub fn init_tracing_subscriber() -> impl Future<Output = anyhow::Result<()>> {
     tracing_subscriber::registry().with(layers).init();
 
     async move {
+        // 向日志文件写入协程发送关机信号
         tx.send(Msg::Shutdown).await.unwrap();
+        // 然后等待日志文件写入协程关闭
         notify.notified().await;
         Ok(())
     }
@@ -109,6 +113,7 @@ impl LogFileWriter {
         })
     }
 
+    /// 检查日期，如果不是同一天，则重新创建一个文件名为今日日期的日志文件
     async fn check_date(&mut self) -> anyhow::Result<()> {
         let now = Local::now();
         if (
@@ -122,6 +127,7 @@ impl LogFileWriter {
         Ok(())
     }
 
+    /// 写入日志文件
     async fn write(&mut self, buf: &[u8]) -> anyhow::Result<()> {
         self.check_date().await?;
         self.file.write_all(buf).await?;
@@ -132,7 +138,8 @@ impl LogFileWriter {
 impl std::io::Write for NonBlockingLogFileWriter {
     #[inline]
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        // 如果在tokio的工作线程中
+        // 如果在tokio的工作线程中则无法使用`blocking_send`，需要使用异步方法发送消息
+        // 因为tokio不允许阻塞异步工作线程(不允许在异步工作线程中使用阻塞方法)
         if let Ok(handle) = tokio::runtime::Handle::try_current() {
             let sender = self.sender.clone();
             let owned_buf = SmallVec::from_slice(buf);
@@ -179,6 +186,7 @@ impl MakeNonBlockingLogFileWriter {
                 }
             };
 
+            // 循环接收日志消息
             while let Some(msg) = rx.recv().await {
                 match msg {
                     Msg::Buf(buf) => {
@@ -187,10 +195,12 @@ impl MakeNonBlockingLogFileWriter {
                         }
                     }
                     Msg::Shutdown => {
+                        // 关闭发送端，继续循环等待将通道里的消息全部处理完成后结束循环
                         rx.close();
                     }
                 }
             }
+            // 循环结束，通知前面init时创建的Future
             notify2.notify_one();
         });
 

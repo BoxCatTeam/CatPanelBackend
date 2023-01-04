@@ -13,6 +13,8 @@ use tokio::sync::{RwLock, RwLockReadGuard};
 
 use crate::configure::get_config;
 
+/// 生成一些简单的impl块
+/// 主要是可以直接用`system.xx()`调用的不需要手动映射类型的简单方法
 macro_rules! simple_system_info_object {
     (@$impl_name:ident; $($(#[$attr:meta])* $name:ident -> $ret:ty;)*) => {
         #[Object]
@@ -400,6 +402,8 @@ impl<'a> From<&'a Disk> for DiskInfo {
     }
 }
 
+/// 分开不同的类型来创建多个不同的限制
+/// 避免刷新一种类型的信息导致其他没刷新的信息也进入"cd"
 #[derive(Copy, Clone, Hash, PartialEq, Eq)]
 pub enum RefreshKey {
     Cpu,
@@ -409,12 +413,14 @@ pub enum RefreshKey {
     Component,
 }
 
+/// 可限制刷新频率的`sysinfo::System`
 pub struct LimitedRefreshSystem {
     system: Arc<RwLock<System>>,
     last_refresh: FnvHashMap<RefreshKey, AtomicCell<Instant>>,
     limit: Duration,
 }
 
+/// 创建包含全部类型的hashmap，这个map必须包含全部的`RefreshKey`
 fn new_last_refresh_map() -> FnvHashMap<RefreshKey, AtomicCell<Instant>> {
     let now = || AtomicCell::new(Instant::now());
     let mut map = FnvHashMap::default();
@@ -440,6 +446,10 @@ impl LimitedRefreshSystem {
         self.system.read().await
     }
 
+    /// 同步的刷新函数
+    /// 执行指定类型的刷新，具体刷新什么由输入的闭包`f`决定
+    ///
+    /// 该函数已经弃用，转为使用非阻塞的`maybe_refresh_nonblocking`
     #[cold]
     #[deprecated]
     #[allow(unused)]
@@ -459,6 +469,9 @@ impl LimitedRefreshSystem {
         }
     }
 
+    /// `maybe_refresh`的异步非阻塞版本
+    ///
+    /// `read_fn`: 由于`spawn_blocking`的`'static`生命周期限制，所以读取数据也要一并在执行刷新的线程中执行
     async fn maybe_refresh_nonblocking<R>(
         &self,
         key: RefreshKey,
@@ -468,26 +481,33 @@ impl LimitedRefreshSystem {
     where
         R: Send + 'static,
     {
+        // 如果距离上次刷新的时间大于限制时间
         if self.safe_get_last_refresh_unchecked(key).load().elapsed() > self.limit {
             let system = self.system.clone();
+            // 在tokio的阻塞专用线程池中执行刷新和读取数据的闭包
             let ret = tokio::task::spawn_blocking(move || {
+                // 同步获取写锁
                 let mut system = system.blocking_write();
                 refresh_fn(&mut system);
+                // 回退为读锁再进行数据读取
+                // 因为同时间可能有其他task在试图读取system，先回退为读锁可以允许其他异步task获取读锁
                 read_fn(&system.downgrade())
             })
             .await
             // join error是因为task里面panic或者task被abort了
             // 而task里的panic的情况下应该与`maybe_refresh`保持一致
             .expect("maybe_refresh_nonblocking");
+            // 更新完毕，将上次刷新时间更改为现在
             self.safe_get_last_refresh_unchecked(key)
                 .store(Instant::now());
             ret
         } else {
+            // 在"cd"内，不需要刷新，直接获取读锁读取数据
             read_fn(&*self.system().await)
         }
     }
 
-    // SAFETY: 全部RefreshKey都应该在hashmap里面
+    // SAFETY: 全部RefreshKey都应该已经在`new_last_refresh_map`时插入
     #[inline]
     fn safe_get_last_refresh_unchecked(&self, key: RefreshKey) -> &AtomicCell<Instant> {
         unsafe { self.last_refresh.get(&key).unwrap_unchecked() }

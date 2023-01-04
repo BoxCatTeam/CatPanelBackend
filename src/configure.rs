@@ -12,10 +12,13 @@ use serde::{Deserialize, Serialize};
 static CONFIG: OnceCell<ArcSwap<Config>> = OnceCell::new();
 
 pub fn init_configure() -> anyhow::Result<()> {
+    // 读取.env文件到环境变量
     if let Ok(path) = dotenv::dotenv() {
         tracing::info!("load {}", path.display());
     }
     let config = reload()?;
+    // 在跑tests的时候可能会有多个test用到config，所以简单的无视掉重复初始化
+    // 但是在正式运行的时候不应该发生这种情况
     #[cfg(test)]
     CONFIG.set(ArcSwap::from_pointee(config)).ok();
     #[cfg(not(test))]
@@ -31,8 +34,11 @@ pub fn get_config() -> Guard<Arc<Config>> {
     unsafe { CONFIG.get_unchecked() }.load()
 }
 
+/// 从以下途径读取配置文件(如果有的话)
+/// 后加载的会覆盖先加载的
 fn reload() -> anyhow::Result<Config> {
     Figment::new()
+        // 一个默认的配置文件，里面应该包含所有配置项合理的默认值
         .merge(Toml::string(include_str!("default.toml")))
         .merge(Json::file("_config_auto.json"))
         .merge(Toml::file("config.toml"))
@@ -41,6 +47,9 @@ fn reload() -> anyhow::Result<Config> {
         .map_err(Into::into)
 }
 
+/// 将一个新的配置合并到现有的配置文件中
+/// 并且可选的持久化到文件中(写入`_config_auto.json`)
+/// 以达到运行从webui界面更改配置的效果
 fn merge<T>(target: T, persistence: bool) -> anyhow::Result<()>
 where
     T: Serialize,
