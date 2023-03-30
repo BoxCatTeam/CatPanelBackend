@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -72,6 +73,7 @@ where
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub http: HttpConfig,
+    pub general: GeneralConfig,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -79,6 +81,17 @@ pub struct HttpConfig {
     pub bind: SocketAddr,
     #[serde(with = "humantime_serde")]
     pub system_info_refresh_limit: Duration,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct GeneralConfig {
+    #[serde(default = "app_path")]
+    pub app_path: PathBuf,
+}
+
+#[inline(always)]
+fn app_path() -> PathBuf {
+    dirs::home_dir().expect("找不到home dir").join(".cat_panel")
 }
 
 #[cfg(test)]

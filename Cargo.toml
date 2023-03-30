@@ -44,6 +44,9 @@ sysinfo = "0.27"
 fnv = "1.0"
 crossbeam-utils = "0.8"
 humantime-serde = "1"
+dirs = "5.0"
+
+rhai = { version = "1.12", features = ["sync"] }
 
 [dev-dependencies]
 graphql_client = "0.11"

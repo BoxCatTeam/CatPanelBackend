@@ -1,3 +1,5 @@
 [http]
 bind = "127.0.0.1:8686"
 system_info_refresh_limit = "2s"
+
+[general]
