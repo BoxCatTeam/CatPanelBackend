@@ -85,13 +85,19 @@ pub struct HttpConfig {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GeneralConfig {
-    #[serde(default = "app_path")]
+    #[serde(default = "default_app_path")]
     pub app_path: PathBuf,
 }
 
 #[inline(always)]
-fn app_path() -> PathBuf {
+fn default_app_path() -> PathBuf {
     dirs::home_dir().expect("找不到home dir").join(".cat_panel")
+}
+
+impl GeneralConfig {
+    pub fn cache_dir(&self) -> PathBuf {
+        self.app_path.join("cache")
+    }
 }
 
 #[cfg(test)]
@@ -99,11 +105,10 @@ mod tests {
     use anyhow::Ok;
     use serde_json::json;
 
-    use crate::configure::{get_config, init_configure, merge};
+    use crate::configure::{get_config, merge};
 
-    #[test]
-    fn test_merge() -> anyhow::Result<()> {
-        init_configure()?;
+    #[cp_macros::test]
+    async fn test_merge() -> anyhow::Result<()> {
         assert_eq!(get_config().http.bind.port(), 8686);
 
         merge(

@@ -29,6 +29,13 @@ todo
 `cargo install cargo-outdated`
 
 ## 命令
+- 运行测试
+
+`cargo test -- --test-threads=1`
+
+***因为部分测试依赖不同环境变量并且共用全局的设置/日志器,
+所以并行测试可能会引起奇怪的错误***
+
 - 调试运行
 
 `cargo run`

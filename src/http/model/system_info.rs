@@ -516,9 +516,9 @@ impl LimitedRefreshSystem {
 
 // 基于以下简单(不是很合理)的测试, 使用`maybe_refresh_nonblocking`几乎总是比`maybe_refresh`快3倍以上
 // 证明`System::refresh_xxx`比较耗时的操作，所以改成使用`maybe_refresh_nonblocking`
-#[tokio::test]
+#[allow(deprecated)]
+#[cp_macros::test]
 async fn test_nonblocking_refresh() -> anyhow::Result<()> {
-    crate::configure::init_configure()?;
     let system = LimitedRefreshSystem::new();
 
     let now = Instant::now();
