@@ -12,6 +12,7 @@ pub fn init_environment() -> anyhow::Result<impl Future<Output = anyhow::Result<
 
     create_dir_all(&get_config().general.app_path)?;
     create_dir_all(get_config().general.cache_dir())?;
+    create_dir_all(get_config().general.components_dir())?;
 
     Ok(handle)
 }

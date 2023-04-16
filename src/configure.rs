@@ -98,6 +98,10 @@ impl GeneralConfig {
     pub fn cache_dir(&self) -> PathBuf {
         self.app_path.join("cache")
     }
+
+    pub fn components_dir(&self) -> PathBuf {
+        self.app_path.join("components")
+    }
 }
 
 #[cfg(test)]
