@@ -58,7 +58,7 @@ deno_runtime = { version = "0.105.0" }
 sha-1 = "=0.10.0"
 url = "2.3.1"
 rust-embed = { version = "6.6.1", features = [] }
-persy = "1.4.4"
+persy = { version = "1.4.4", optional = true }
 redb = "0.15.0"
 heed = "0.11.0"
 
@@ -71,7 +71,9 @@ graphql_client = "0.11"
 criterion = { version = "0.4.0", features = ["html_reports"] }
 
 [features]
+default = []
 io_uring = []
+persy = ["dep:persy"]
 
 [profile.release]
 lto = true

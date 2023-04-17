@@ -1,9 +1,11 @@
 use std::path::Path;
 
+#[cfg(feature = "persy")]
 pub use crate::kv::persy::PersyStore;
 pub use crate::kv::lmdb::LmdbStore;
 pub use crate::kv::redb::RedbStore;
 
+#[cfg(feature = "persy")]
 mod persy;
 mod lmdb;
 mod redb;
