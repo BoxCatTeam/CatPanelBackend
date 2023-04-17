@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::net::SocketAddr;
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -72,6 +73,7 @@ where
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub http: HttpConfig,
+    pub general: GeneralConfig,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -81,16 +83,36 @@ pub struct HttpConfig {
     pub system_info_refresh_limit: Duration,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct GeneralConfig {
+    #[serde(default = "default_app_path")]
+    pub app_path: PathBuf,
+}
+
+#[inline(always)]
+fn default_app_path() -> PathBuf {
+    dirs::home_dir().expect("找不到home dir").join(".cat_panel")
+}
+
+impl GeneralConfig {
+    pub fn cache_dir(&self) -> PathBuf {
+        self.app_path.join("cache")
+    }
+
+    pub fn components_dir(&self) -> PathBuf {
+        self.app_path.join("components")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use anyhow::Ok;
     use serde_json::json;
 
-    use crate::configure::{get_config, init_configure, merge};
+    use crate::configure::{get_config, merge};
 
-    #[test]
-    fn test_merge() -> anyhow::Result<()> {
-        init_configure()?;
+    #[cp_macros::test]
+    async fn test_merge() -> anyhow::Result<()> {
         assert_eq!(get_config().http.bind.port(), 8686);
 
         merge(

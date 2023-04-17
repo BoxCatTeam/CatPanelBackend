@@ -1,16 +1,16 @@
 use axum::routing::get;
 use axum::Router;
+use axum_sessions::async_session::MemoryStore;
 use axum_sessions::SessionLayer;
 use rand::Rng;
 use tokio_graceful_shutdown::SubsystemHandle;
 use tracing::info;
 
 use crate::configure::get_config;
-use crate::http::rocksdb_session_store::RocksdbStore;
 
 mod error;
 mod model;
-mod rocksdb_session_store;
+//mod rocksdb_session_store;
 mod routes;
 mod ws;
 
@@ -19,7 +19,9 @@ pub async fn start_http_server(handle: SubsystemHandle) -> anyhow::Result<()> {
         .route("/", get(routes::hello_world))
         .route("/ws", get(ws::ws_route))
         .layer(SessionLayer::new(
-            RocksdbStore::new()?,
+            // 参考Cargo.toml中rocksdb依赖处的说明
+            //RocksdbStore::new()?,
+            MemoryStore::new(),
             &rand::thread_rng().gen::<[u8; 64]>(),
         ));
 

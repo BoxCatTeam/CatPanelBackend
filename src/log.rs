@@ -1,3 +1,4 @@
+use std::env;
 use std::future::Future;
 use std::path::Path;
 use std::str::FromStr;
@@ -11,64 +12,86 @@ use tokio::io::AsyncWriteExt;
 use tokio::sync::mpsc::error::SendError;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::Notify;
+use tracing::Level;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::fmt::MakeWriter;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
 
+#[cfg(test)]
+static INITED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
 const LOG_DIR: &str = "logs";
 
 // 返回一个Future，用于等待异步的日志文件写入协程结束
 pub fn init_tracing_subscriber() -> impl Future<Output = anyhow::Result<()>> {
+    let not_write_log_file = env::var("NOT_WRITE_LOG_FILE").is_ok();
+    let level_filter = env::var("LOG_LEVEL")
+        .ok()
+        .and_then(|var| LevelFilter::from_str(&var).ok())
+        .unwrap_or(LevelFilter::INFO);
+    // 一些默认的过滤器
+    let default_filter = tracing_subscriber::filter::filter_fn(|metadata| {
+        // swc相关crate会发出及其大量的重复的debug日志, 在绝大多数情况下根本没用, 造成严重污染
+        !(metadata.level() == &Level::DEBUG && metadata.target().starts_with("swc_"))
+    });
+
     let mut layers = Vec::with_capacity(2);
 
     layers.push(
         tracing_subscriber::fmt::layer()
             .compact()
             .with_ansi(true)
-            .with_filter(
-                std::env::var("LOG_LEVEL")
-                    .ok()
-                    .and_then(|var| LevelFilter::from_str(&var).ok())
-                    .unwrap_or(LevelFilter::INFO),
-            )
+            .with_filter(default_filter.clone())
+            .with_filter(level_filter)
             .boxed(),
     );
 
-    let (w, tx, notify) = MakeNonBlockingLogFileWriter::new();
+    let (w, tx, notify) = MakeNonBlockingLogFileWriter::new(not_write_log_file);
 
-    layers.push(
-        tracing_subscriber::fmt::layer()
-            .json()
-            .flatten_event(true)
-            .with_ansi(false)
-            .with_file(true)
-            .with_line_number(true)
-            .with_thread_names(true)
-            .with_thread_ids(true)
-            .with_current_span(true)
-            .with_writer(w)
-            .with_filter(
-                std::env::var("LOG_FILE_LEVEL")
-                    .ok()
-                    .and_then(|var| LevelFilter::from_str(&var).ok())
-                    .unwrap_or(LevelFilter::DEBUG),
-            )
-            // 过滤掉由`log_file_writer`发出的日志，避免记录自己发出的日志导致死循环
-            .with_filter(tracing_subscriber::filter::filter_fn(|metadata| {
-                metadata.target() != "log_file_writer"
-            }))
-            .boxed(),
-    );
+    if !not_write_log_file {
+        layers.push(
+            tracing_subscriber::fmt::layer()
+                .json()
+                .flatten_event(true)
+                .with_ansi(false)
+                .with_file(true)
+                .with_line_number(true)
+                .with_thread_names(true)
+                .with_thread_ids(true)
+                .with_current_span(true)
+                .with_writer(w)
+                .with_filter(default_filter)
+                .with_filter(level_filter)
+                // 过滤掉由`log_file_writer`发出的日志，避免记录自己发出的日志导致死循环
+                .with_filter(tracing_subscriber::filter::filter_fn(|metadata| {
+                    metadata.target() != "log_file_writer"
+                }))
+                .boxed(),
+        );
+    }
 
-    tracing_subscriber::registry().with(layers).init();
+    loop {
+        #[cfg(test)]
+        {
+            if !INITED.load(std::sync::atomic::Ordering::Acquire) {
+                INITED.store(true, std::sync::atomic::Ordering::Release);
+            } else {
+                break;
+            }
+        }
+        tracing_subscriber::registry().with(layers).init();
+        break;
+    }
 
     async move {
-        // 向日志文件写入协程发送关机信号
-        tx.send(Msg::Shutdown).await.unwrap();
-        // 然后等待日志文件写入协程关闭
-        notify.notified().await;
+        if !not_write_log_file {
+            // 向日志文件写入协程发送关机信号
+            tx.send(Msg::Shutdown).await.unwrap();
+            // 然后等待日志文件写入协程关闭
+            notify.notified().await;
+        }
         Ok(())
     }
 }
@@ -172,37 +195,39 @@ impl std::io::Write for NonBlockingLogFileWriter {
 }
 
 impl MakeNonBlockingLogFileWriter {
-    pub fn new() -> (Self, Sender<Msg>, Arc<Notify>) {
+    pub fn new(not_write_log_file: bool) -> (Self, Sender<Msg>, Arc<Notify>) {
         let (tx, mut rx) = tokio::sync::mpsc::channel(100);
         let notify = Arc::new(Notify::new());
         let notify2 = notify.clone();
 
-        tokio::task::spawn(async move {
-            let mut writer = match LogFileWriter::new().await {
-                Ok(w) => w,
-                Err(err) => {
-                    tracing::error!(target: "log_file_writer", "日志文件写入器失败: {}", err);
-                    panic!("{}", err)
-                }
-            };
+        if !not_write_log_file {
+            tokio::task::spawn(async move {
+                let mut writer = match LogFileWriter::new().await {
+                    Ok(w) => w,
+                    Err(err) => {
+                        tracing::error!(target: "log_file_writer", "日志文件写入器失败: {}", err);
+                        panic!("{}", err)
+                    }
+                };
 
-            // 循环接收日志消息
-            while let Some(msg) = rx.recv().await {
-                match msg {
-                    Msg::Buf(buf) => {
-                        if let Err(err) = writer.write(&buf).await {
-                            tracing::error!(target: "log_file_writer", "写入日志文件时发生错误: {}", err);
+                // 循环接收日志消息
+                while let Some(msg) = rx.recv().await {
+                    match msg {
+                        Msg::Buf(buf) => {
+                            if let Err(err) = writer.write(&buf).await {
+                                tracing::error!(target: "log_file_writer", "写入日志文件时发生错误: {}", err);
+                            }
+                        }
+                        Msg::Shutdown => {
+                            // 关闭发送端，继续循环等待将通道里的消息全部处理完成后结束循环
+                            rx.close();
                         }
                     }
-                    Msg::Shutdown => {
-                        // 关闭发送端，继续循环等待将通道里的消息全部处理完成后结束循环
-                        rx.close();
-                    }
                 }
-            }
-            // 循环结束，通知前面init时创建的Future
-            notify2.notify_one();
-        });
+                // 循环结束，通知前面init时创建的Future
+                notify2.notify_one();
+            });
+        }
 
         (
             MakeNonBlockingLogFileWriter { sender: tx.clone() },
