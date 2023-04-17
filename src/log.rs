@@ -50,25 +50,27 @@ pub fn init_tracing_subscriber() -> impl Future<Output = anyhow::Result<()>> {
 
     let (w, tx, notify) = MakeNonBlockingLogFileWriter::new(not_write_log_file);
 
-    layers.push(
-        tracing_subscriber::fmt::layer()
-            .json()
-            .flatten_event(true)
-            .with_ansi(false)
-            .with_file(true)
-            .with_line_number(true)
-            .with_thread_names(true)
-            .with_thread_ids(true)
-            .with_current_span(true)
-            .with_writer(w)
-            .with_filter(default_filter)
-            .with_filter(level_filter)
-            // 过滤掉由`log_file_writer`发出的日志，避免记录自己发出的日志导致死循环
-            .with_filter(tracing_subscriber::filter::filter_fn(|metadata| {
-                metadata.target() != "log_file_writer"
-            }))
-            .boxed(),
-    );
+    if !not_write_log_file {
+        layers.push(
+            tracing_subscriber::fmt::layer()
+                .json()
+                .flatten_event(true)
+                .with_ansi(false)
+                .with_file(true)
+                .with_line_number(true)
+                .with_thread_names(true)
+                .with_thread_ids(true)
+                .with_current_span(true)
+                .with_writer(w)
+                .with_filter(default_filter)
+                .with_filter(level_filter)
+                // 过滤掉由`log_file_writer`发出的日志，避免记录自己发出的日志导致死循环
+                .with_filter(tracing_subscriber::filter::filter_fn(|metadata| {
+                    metadata.target() != "log_file_writer"
+                }))
+                .boxed(),
+        );
+    }
 
     loop {
         #[cfg(test)]
