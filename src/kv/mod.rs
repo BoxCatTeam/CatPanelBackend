@@ -1,10 +1,21 @@
 use std::path::Path;
 
-use crate::kv::persy::PersyStore;
+pub use crate::kv::persy::PersyStore;
+pub use crate::kv::lmdb::LmdbStore;
+pub use crate::kv::redb::RedbStore;
 
 mod persy;
+mod lmdb;
+mod redb;
 
-pub type DefaultStore = PersyStore;
+// 由于windows/macos不支持 https://en.wikipedia.org/wiki/Sparse_file
+// 所以在windows上会导致创建数据库时创建一个 大小=map_size 的本地目录
+// 在unix系统上使用lmdb, 在其他系统上使用redb
+
+#[cfg(target_family = "unix")]
+pub type DefaultStore = LmdbStore;
+#[cfg(not(target_family = "unix"))]
+pub type DefaultStore = RedbStore;
 
 pub trait KVStore {
     /// 具体实现应该把本地储存的文件/目录更改为独特的拓展名, 防止后端更换默认储存实现后读取错误的文件
@@ -21,7 +32,9 @@ pub trait KVStore {
 
     fn get(&self, k: &str) -> anyhow::Result<Option<Vec<u8>>>;
 
-    fn exists(&self, k: &str) -> anyhow::Result<bool>;
+    fn exists(&self, k: &str) -> anyhow::Result<bool> {
+        self.get(k).map(|x| x.is_some())
+    }
 
     fn remove(&self, k: &str) -> anyhow::Result<()>;
 

@@ -59,6 +59,8 @@ sha-1 = "=0.10.0"
 url = "2.3.1"
 rust-embed = { version = "6.6.1", features = [] }
 persy = "1.4.4"
+redb = "0.15.0"
+heed = "0.11.0"
 
 [patch.crates-io]
 # 强行更改libsqlite3-sys版本为0.25
@@ -66,6 +68,7 @@ sqlx = { git = "https://github.com/BoxCatTeam/sqlx", branch = "libsqlite3-sys0.2
 
 [dev-dependencies]
 graphql_client = "0.11"
+criterion = { version = "0.4.0", features = ["html_reports"] }
 
 [features]
 io_uring = []
@@ -76,6 +79,10 @@ strip = true
 codegen-units = 1
 opt-level = 3
 panic = "abort"
+
+[[bench]]
+name = "bench_kv_store"
+harness = false
 
 [workspace]
 members = [
